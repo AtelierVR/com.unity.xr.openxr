@@ -6,6 +6,10 @@ using System.Linq;
 using UnityEditor;
 #endif
 
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
+
 #if UNITY_ANALYTICS && ENABLE_CLOUD_SERVICES_ANALYTICS
 using UnityEngine.Analytics;
 #endif //UNITY_ANALYTICS && ENABLE_CLOUD_SERVICES_ANALYTICS
@@ -20,6 +24,10 @@ namespace UnityEngine.XR.OpenXR
         private const string kEventInitialize = "openxr_initialize";
 
 #if ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already re-initialized on demand by Initialize(); opt out so behavior matches older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         private static bool s_Initialized = false;
 #endif //ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
 

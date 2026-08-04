@@ -127,7 +127,18 @@ After you have configured the settings, you must also turn on foveated rendering
 
 Devices that provide eye tracking can support gaze-based foveated rendering in which the highest resolution area is centered where the user is looking.
 
-When using the Unity **SRP Foveation** API, you do not need to enable gaze-based foveated rendering in the OpenXR settings. You do need to [turn the feature on at runtime](#use-the-srp-foveation-api) and make sure any required permissions are enabled.
+To use eye tracking, you need to enable eye tracking as follows:
+
+1. Open the **Project Settings** window.
+1. Under **XR Plug-in Management**, select the **OpenXR** settings.
+1. Select the **Android, Meta Quest, Android XR** tab.
+1. In the list of **OpenXR Feature Groups**, select **All Features**.
+1. Under **OpenXR Feature Groups**, click the gear icon next to the **Foveated Rendering** feature.
+1. Enable the **Use Eye Tracking** checkbox.
+
+**Use Eye Tracking** controls whether the build requests the eye tracking OpenXR extension and writes the required Android permissions and manifest flags at build time. Unity enables eye tracking by default. Disable it if you want to use foveated rendering, including [Quad Views](xref:openxr-quad-views), without requesting eye tracking or its associated Android permissions.
+
+When using the Unity **SRP Foveation** API, you need to [turn the feature on at runtime](#use-the-srp-foveation-api) and make sure any required permissions are enabled.
 
 When using the **Legacy**, Meta Core XR SDK, you must enable the **Meta XR Eye Tracked Foveation** OpenXR feature.
 

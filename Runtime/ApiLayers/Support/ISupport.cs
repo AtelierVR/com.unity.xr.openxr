@@ -19,7 +19,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example shows how to create a custom support implementation that logs API layer lifecycle events:
-        /// <c>
+        /// </para>
+        /// <code>
         /// public class CustomLayerSupport : ApiLayers.ISupport
         /// {
         ///     public void Setup(IntPtr hookGetInstanceProcAddr)
@@ -37,8 +38,7 @@ namespace UnityEngine.XR.OpenXR
         ///
         /// // Register the support object
         /// ApiLayersFeature.AddSupport(new CustomLayerSupport());
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         /// <seealso cref="Features.ApiLayersFeature.AddSupport"/>
         /// <seealso cref="Features.ApiLayersFeature.RemoveSupport"/>

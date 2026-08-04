@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine.InputSystem;
@@ -89,6 +90,14 @@ namespace UnityEngine.XR.OpenXR.Tests
 
     class OpenXRInputTests : OpenXRInputTestsBase
     {
+        /// <summary>
+        /// Every concrete Input System device defined in the OpenXR package.
+        /// </summary>
+        static readonly Type[] s_AllOpenXRInputDeviceTypes = typeof(OpenXRInteractionFeature).Assembly.GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition && typeof(InputSystem.InputDevice).IsAssignableFrom(t))
+            .OrderBy(t => t.FullName)
+            .ToArray();
+
         protected override void QueryBuildFeatures(List<Type> featureTypes)
         {
             base.QueryBuildFeatures(featureTypes);
@@ -672,6 +681,55 @@ namespace UnityEngine.XR.OpenXR.Tests
             // Make sure the two arrays are equal
             Assert.IsTrue(knownInteractionFeatures.Length == testedFeatures.Length && knownInteractionFeatures.Intersect(testedFeatures).Count() == knownInteractionFeatures.Length,
                 "One or more interaction features has not been added to the testable interaction feature list.");
+        }
+
+        /// <summary>
+        /// Ensures that every Input System device defined in the package initializes all of its
+        /// <see cref="InputControl"/> properties in <c>FinishSetup</c> so that none are left null.
+        /// </summary>
+        [Test]
+        public void DeviceInputControlPropertiesInitialized([ValueSource(nameof(s_AllOpenXRInputDeviceTypes))] Type deviceType)
+        {
+            // The device layout is registered under a temporary name and force created with InputSystem.AddDevice so
+            // that FinishSetup runs. Each InputControl property declared on the device type is then verified to be
+            // non-null. The device and the temporary layout are removed at the end so nothing leaks between tests.
+
+            // Make sure the base control layouts the device layouts depend on (e.g. Pose, Haptic) are registered.
+            OpenXRInput.RegisterLayouts();
+
+            // Register the layout under a unique name so we don't clobber the production registration (which may
+            // include a device matcher that other tests rely on) and force create the device so FinishSetup runs.
+            var layoutName = $"{deviceType.Name}_DeviceInputControlPropertiesInitialized";
+            InputSystem.InputSystem.RegisterLayout(deviceType, layoutName);
+
+            InputSystem.InputDevice device = null;
+            try
+            {
+                device = InputSystem.InputSystem.AddDevice(layoutName);
+                Assert.That(device, Is.Not.Null, $"Failed to create a '{deviceType.Name}' device with temporary test layout.");
+
+                // Every InputControl property declared on the device type should be assigned in FinishSetup.
+                var controlProperties = deviceType
+                    .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                    .Where(p => typeof(InputControl).IsAssignableFrom(p.PropertyType))
+                    .ToArray();
+
+                Assume.That(controlProperties.Length, Is.GreaterThan(0), $"Could not find any InputControl properties in '{deviceType.FullName}'.");
+                foreach (var property in controlProperties)
+                {
+                    var control = property.GetValue(device);
+                    Assert.That(control, Is.Not.Null,
+                        $"InputControl property '{deviceType.Name}.{property.Name}' was not initialized in the FinishSetup method. " +
+                        "All InputControl properties must be assigned (e.g. via GetChildControl) so they are not left null.");
+                }
+            }
+            finally
+            {
+                if (device != null)
+                    InputSystem.InputSystem.RemoveDevice(device);
+
+                InputSystem.InputSystem.RemoveLayout(layoutName);
+            }
         }
 
         /// <summary>

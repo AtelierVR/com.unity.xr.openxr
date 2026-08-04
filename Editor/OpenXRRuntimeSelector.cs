@@ -9,6 +9,9 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using Microsoft.Win32;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 [assembly: InternalsVisibleTo("UnityEditor.XR.OpenXR.Tests")]
 namespace UnityEditor.XR.OpenXR
@@ -249,6 +252,11 @@ namespace UnityEditor.XR.OpenXR
             private string m_jsonPath;
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // This class has an explicit static constructor, which is incompatible with [AutoStaticsCleanup]
+        // (Unity would emit UAL0014). Opting out preserves current behavior exactly.
+        [NoAutoStaticsCleanup]
+#endif
         internal static List<RuntimeDetector> runtimeDetectors;
         internal static List<RuntimeDetector> RuntimeDetectors
         {
@@ -383,6 +391,9 @@ namespace UnityEditor.XR.OpenXR
 
         static class Content
         {
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_ActiveRuntimeLabel = new GUIContent("Play Mode OpenXR Runtime", "Changing this value will only affect this instance of the editor.");
         }
 

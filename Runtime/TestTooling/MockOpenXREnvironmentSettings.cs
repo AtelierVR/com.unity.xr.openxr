@@ -8,6 +8,9 @@ using UnityEditor.XR.OpenXR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR.Features;
 using UnityEngine.XR.OpenXR.Features.Mock;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.TestTooling
 {
@@ -24,7 +27,14 @@ namespace UnityEngine.XR.OpenXR.TestTooling
     /// </remarks>
     public class MockOpenXREnvironmentSettings : IDisposable
     {
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static path-component lookup table, never mutated at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly string[] s_TestGeneralSettings = { "Temp", "Test" };
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static readonly string[] s_TempSettingsPath = { "Temp", "Test", "Settings" };
 
         string m_TestPathToGeneralSettings;
@@ -141,8 +151,13 @@ namespace UnityEngine.XR.OpenXR.TestTooling
 
             AssetDatabase.SaveAssets();
 
+#if UNITY_6000_7_OR_NEWER
+            EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.settingsKey, out m_OriginalSettingsPerBuildTarget);
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_SettingsPerBuildTarget, true);
+#else
             EditorBuildSettings.TryGetConfigObject(XRGeneralSettings.k_SettingsKey, out m_OriginalSettingsPerBuildTarget);
             EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_SettingsPerBuildTarget, true);
+#endif
 #endif
         }
 
@@ -171,10 +186,15 @@ namespace UnityEngine.XR.OpenXR.TestTooling
         {
 #if UNITY_EDITOR
             if (m_OriginalSettingsPerBuildTarget != null)
-                EditorBuildSettings.AddConfigObject(
-                    XRGeneralSettings.k_SettingsKey, m_OriginalSettingsPerBuildTarget, true);
+#if UNITY_6000_7_OR_NEWER
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, m_OriginalSettingsPerBuildTarget, true);
+            else
+                EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
+#else
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, m_OriginalSettingsPerBuildTarget, true);
             else
                 EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+#endif
 
             AssetDatabase.SaveAssets();
             m_TestManagerSettings = null;

@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.XR.OpenXR;
 
 using UnityEngine.XR.OpenXR.Features.MetaQuestSupport;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features.MetaQuestSupport
 {
@@ -14,10 +17,23 @@ namespace UnityEditor.XR.OpenXR.Features.MetaQuestSupport
         private bool m_LateLatchingModeEnabled;
         private bool m_LateLatchingDebug;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static UI label caches; content never changes at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         private static GUIContent s_LateLatchingSupportedLabel = EditorGUIUtility.TrTextContent("Late Latching (Vulkan)", "Enables the OpenXR plugin to synchronize poses right before rendering starts, to reduce input latency in graphics");
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static GUIContent s_LateLatchingDebugLabel = EditorGUIUtility.TrTextContent("Late Latching Debug Mode", "Enables debugging visualization and logging for the Late Latching feature. When enabled, provides additional diagnostic information to help identify timing and synchronization issues. Only use during development as this may impact performance.");
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static GUIContent s_ShowAndroidExperimentalLabel = EditorGUIUtility.TrTextContent("Experimental", "Experimental settings that are under active development and should be used with caution.");
 #if UNITY_6000_1_OR_NEWER
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static GUIContent s_MultiviewRenderRegionsOptimizationsLabel = EditorGUIUtility.TrTextContent("Multiview Render Regions Optimizations (Vulkan)", "Activates Multiview Render Regions optimizations at application start. Requires usage of Unity 6.1 or later, Vulkan as the Graphics API, Render Mode set to Multi-view and Symmetric rendering enabled.");
 #endif
 

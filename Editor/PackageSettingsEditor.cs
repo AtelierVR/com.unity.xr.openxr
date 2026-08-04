@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.XR.OpenXR;
 using UnityEditor.XR.OpenXR.Features;
 using UnityEngine.Rendering;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR
 {
@@ -17,6 +20,11 @@ namespace UnityEditor.XR.OpenXR
 #endif
 
 #if XR_MGMT_4_1_0_OR_OLDER
+#if LIFECYCLE_APIS_AVAILABLE
+        // Manually unregistered/reassigned in Awake() as a workaround for a fixed XRManagement bug;
+        // opt out to keep behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         static PackageSettingsEditor s_LastPackageSettingsEditor = null;
 #endif
 
@@ -24,22 +32,41 @@ namespace UnityEditor.XR.OpenXR
         {
             public const float k_Space = 15.0f;
 
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI label caches; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_renderModeLabel = new GUIContent("Render Mode", "Choose the rendering strategy.");
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_vulkanAdditionalGraphicsQueue = new GUIContent("Additional Graphics Queue (Vulkan)", "Request an additional Vulkan graphics queue for its own rendering at startup.");
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_vulkanOffscreenSwapchainNoMainDisplay = new GUIContent("Offscreen Rendering Only (Vulkan)", "Enabled offscreen swapchains and stops allocations for the main display buffer. This setting should be disabled for handheld platforms.");
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent[] k_renderModeOptions = new GUIContent[2]
             {
                 new GUIContent("Multi-pass"),
                 new GUIContent("Single Pass Instanced"),
             };
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent[] k_androidRenderModeOptions = new GUIContent[2]
             {
                 new GUIContent("Multi-pass"),
                 new GUIContent("Single Pass Instanced \\ Multi-view"),
             };
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_latencyOptimization = new GUIContent("Latency Optimization", "Choose how the OpenXR plug-in minimizes latency for input polling or rendering.");
         }
 

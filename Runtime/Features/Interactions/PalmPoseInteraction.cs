@@ -71,34 +71,45 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             /// <summary>
             /// A [Vector3Control](xref:UnityEngine.InputSystem.Controls.Vector3Control) required for backwards compatibility with the XRSDK layouts. This is the device position. This value is equivalent to mapping palmPose/position.
             /// </summary>
-            [Preserve, InputControl(offset = 8, noisy = true, alias = "palmPosition")]
+            /// <remarks>devicePosition and palmPosition are at the same byte offset, so both read the same memory.</remarks>
+            [Preserve, InputControl(offset = 8, noisy = true)]
             new public Vector3Control devicePosition { get; private set; }
 
             /// <summary>
             /// A [QuaternionControl](xref:UnityEngine.InputSystem.Controls.QuaternionControl) required for backwards compatibility with the XRSDK layouts. This is the device orientation. This value is equivalent to mapping palmPose/rotation.
             /// </summary>
-            [Preserve, InputControl(offset = 20, noisy = true, alias = "palmRotation")]
+            /// <remarks>deviceRotation and palmRotation are at the same byte offset, so both read the same memory.</remarks>
+            [Preserve, InputControl(offset = 20, noisy = true)]
             new public QuaternionControl deviceRotation { get; private set; }
 
             /// <summary>
             /// A [Vector3Control](xref:UnityEngine.InputSystem.Controls.Vector3Control) required for backwards compatibility with the XRSDK layouts. This is the palm pose position. This value is equivalent to mapping palmPose/position.
             /// </summary>
+            /// <remarks>devicePosition and palmPosition are at the same byte offset, so both read the same memory.</remarks>
             [Preserve, InputControl(offset = 8, noisy = true)]
             public Vector3Control palmPosition { get; private set; }
 
             /// <summary>
             /// A [QuaternionControl](xref:UnityEngine.InputSystem.Controls.QuaternionControl) required for backwards compatibility with the XRSDK layouts. This is the palm pose orientation. This value is equivalent to mapping palmPose/rotation.
             /// </summary>
-            [Preserve, InputControl(offset = 20, noisy = true)]
+            /// <remarks>deviceRotation and palmRotation are at the same byte offset, so both read the same memory.</remarks>
+            [Preserve, InputControl(offset = 20, noisy = true, alias = "palmOrientation")]
             public QuaternionControl palmRotation { get; private set; }
 
             /// <summary>
-            /// Internal call used to assign controls to the the correct element.
+            /// Internal call used to assign controls to the correct element.
             /// </summary>
             protected override void FinishSetup()
             {
                 base.FinishSetup();
+
                 palmPose = GetChildControl<PoseControl>("palmPose");
+                isTracked = GetChildControl<ButtonControl>("isTracked");
+                trackingState = GetChildControl<IntegerControl>("trackingState");
+                devicePosition = GetChildControl<Vector3Control>("devicePosition");
+                deviceRotation = GetChildControl<QuaternionControl>("deviceRotation");
+                palmPosition = GetChildControl<Vector3Control>("palmPosition");
+                palmRotation = GetChildControl<QuaternionControl>("palmRotation");
             }
         }
 
@@ -136,26 +147,19 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
                     if (null == settings)
                         return false;
 
-                    bool palmPoseFeatureEnabled = false;
+                    bool thisFeatureEnabled = false;
                     bool otherNonAdditiveInteractionFeatureEnabled = false;
                     foreach (var feature in settings.GetFeatures<OpenXRInteractionFeature>())
                     {
                         if (feature.enabled)
                         {
                             if (feature is PalmPoseInteraction)
-                                palmPoseFeatureEnabled = true;
-                            else if (feature is OpenXRInteractionFeature interactionFeature && !interactionFeature.IsAdditive)
-                            {
-#if UNITY_INPUT_SYSTEM_ENABLE_XR
-                                if (!(feature is EyeGazeInteraction))
-#endif
-                                {
-                                    otherNonAdditiveInteractionFeatureEnabled = true;
-                                }
-                            }
+                                thisFeatureEnabled = true;
+                            else if (!((OpenXRInteractionFeature)feature).IsAdditive && !(feature is EyeGazeInteraction))
+                                otherNonAdditiveInteractionFeatureEnabled = true;
                         }
                     }
-                    return palmPoseFeatureEnabled && otherNonAdditiveInteractionFeatureEnabled;
+                    return thisFeatureEnabled && otherNonAdditiveInteractionFeatureEnabled;
                 },
                 fixIt = () => SettingsService.OpenProjectSettings("Project/XR Plug-in Management/OpenXR"),
                 fixItAutomatic = false,

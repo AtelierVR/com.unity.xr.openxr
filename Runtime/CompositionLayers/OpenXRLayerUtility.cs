@@ -371,7 +371,7 @@ namespace UnityEngine.XR.OpenXR.CompositionLayers
 #pragma warning disable CS0618
                     var instanceId = layer.GetInstanceID();
 #pragma warning restore CS0618
-                    if(instanceId == layerId)
+                    if (instanceId == layerId)
                     {
                         Debug.LogWarning("GetInstanceID is deprecated in Unity 6.4. Use CompositionLayerManager.TryGetLayerId instead.");
                         surfaceObject = IntPtr.Zero;

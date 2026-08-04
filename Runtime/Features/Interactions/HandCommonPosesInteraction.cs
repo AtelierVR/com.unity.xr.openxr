@@ -72,7 +72,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             public PoseControl pinchPose { get; private set; }
 
             /// <summary>
-            /// Internal call used to assign controls to the the correct element.
+            /// Internal call used to assign controls to the correct element.
             /// </summary>
             protected override void FinishSetup()
             {
@@ -128,19 +128,19 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
                     if (null == settings)
                         return false;
 
-                    bool handCommonPosesFeatureEnabled = false;
+                    bool thisFeatureEnabled = false;
                     bool otherNonAdditiveInteractionFeatureEnabled = false;
                     foreach (var feature in settings.GetFeatures<OpenXRInteractionFeature>())
                     {
                         if (feature.enabled)
                         {
                             if (feature is HandCommonPosesInteraction)
-                                handCommonPosesFeatureEnabled = true;
-                            else if (!(feature as OpenXRInteractionFeature).IsAdditive && !(feature is EyeGazeInteraction))
+                                thisFeatureEnabled = true;
+                            else if (!((OpenXRInteractionFeature)feature).IsAdditive && !(feature is EyeGazeInteraction))
                                 otherNonAdditiveInteractionFeatureEnabled = true;
                         }
                     }
-                    return handCommonPosesFeatureEnabled && otherNonAdditiveInteractionFeatureEnabled;
+                    return thisFeatureEnabled && otherNonAdditiveInteractionFeatureEnabled;
                 },
                 fixIt = () => SettingsService.OpenProjectSettings("Project/XR Plug-in Management/OpenXR"),
                 fixItAutomatic = false,

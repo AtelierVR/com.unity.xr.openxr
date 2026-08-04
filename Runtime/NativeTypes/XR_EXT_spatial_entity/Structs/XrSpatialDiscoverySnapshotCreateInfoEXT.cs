@@ -1,5 +1,8 @@
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.NativeTypes
 {
@@ -18,6 +21,9 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
         /// <summary>
         /// Get a default instance with no component types specified.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static XrSpatialDiscoverySnapshotCreateInfoEXT defaultValue = new(0, null);
 
         /// <summary>

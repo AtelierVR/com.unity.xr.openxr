@@ -8,13 +8,17 @@ namespace UnityEngine.XR.OpenXR.Input
     [Preserve, InputControlLayout(displayName = "OpenXR HMD")]
     internal class OpenXRHmd : XRHMD
     {
-        [Preserve, InputControl] ButtonControl userPresence { get; set; }
+        /// <summary>
+        /// Indicates whether the user is present and interacting with the device.
+        /// </summary>
+        [Preserve, InputControl]
+        public ButtonControl userPresence { get; protected set; }
 
         /// <inheritdoc/>
         protected override void FinishSetup()
         {
             base.FinishSetup();
-            userPresence = GetChildControl<ButtonControl>("UserPresence");
+            userPresence = GetChildControl<ButtonControl>("userPresence");
         }
     }
 }

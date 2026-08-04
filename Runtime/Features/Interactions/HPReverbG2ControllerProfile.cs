@@ -170,7 +170,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
                 gripPressed = GetChildControl<ButtonControl>("gripPressed");
                 trigger = GetChildControl<AxisControl>("trigger");
                 triggerPressed = GetChildControl<ButtonControl>("triggerPressed");
-                thumbstick = GetChildControl<StickControl>("thumbstick");
+                thumbstick = GetChildControl<ThumbstickControl>("thumbstick");
                 thumbstickClicked = GetChildControl<ButtonControl>("thumbstickClicked");
 
                 devicePose = GetChildControl<PoseControl>("devicePose");

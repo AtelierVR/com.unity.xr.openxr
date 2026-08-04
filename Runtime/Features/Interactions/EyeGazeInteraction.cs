@@ -7,6 +7,9 @@ using UnityEngine.XR.OpenXR.Input;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 #if USE_INPUT_SYSTEM_POSE_CONTROL
 using PoseControl = UnityEngine.InputSystem.XR.PoseControl;
@@ -195,8 +198,15 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
     public static class EyeTrackingUsages
     {
         /// <summary>The origin position for the gaze. The gaze represents where a user is looking, and <see cref="gazePosition"/> represents the starting location, close to the eyes, from which to project a gaze ray from.</summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Constant-like usage identifier, never mutated at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         public static InputFeatureUsage<Vector3> gazePosition = new InputFeatureUsage<Vector3>("gazePosition");
         /// <summary>The orientation of the gaze, such that the direction of the gaze is the same as <see cref="Vector3.forward "/> * gazeRotation. Use with <see cref="gazePosition"/> to create a gaze ray.</summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static InputFeatureUsage<Quaternion> gazeRotation = new InputFeatureUsage<Quaternion>("gazeRotation");
     }
 }

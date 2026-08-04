@@ -11,7 +11,7 @@ namespace UnityEngine.XR.OpenXR.Input
     /// Represents a tracked object in real-world space. All poses are given in the same root space, dictated by <see cref="UnityEngine.XR.TrackingOriginModeFlags"/>.
     /// </summary>
 #if USE_INPUT_SYSTEM_POSE_CONTROL
-    [Obsolete("OpenXR.Input.Pose is deprecated, Please use UnityEngine.InputSystem.XR.PoseState instead", false)]
+    [Obsolete("UnityEngine.XR.OpenXR.Input.Pose is deprecated. Please use UnityEngine.InputSystem.XR.PoseState instead.", false)]
 #endif
     public struct Pose
     {
@@ -50,7 +50,7 @@ namespace UnityEngine.XR.OpenXR.Input
     /// Input System control that wraps up a <see cref="Pose"/> structure. All individual pose elements can be referenced separately. See <see cref="InputControl"/> for more details.
     /// </summary>
 #if USE_INPUT_SYSTEM_POSE_CONTROL
-    [Obsolete("OpenXR.Input.PoseControl is deprecated. Please use UnityEngine.InputSystem.XR.PoseControl instead.", false)]
+    [Obsolete("UnityEngine.XR.OpenXR.Input.PoseControl is deprecated. Please use UnityEngine.InputSystem.XR.PoseControl instead.", false)]
 #endif
     public class PoseControl : InputControl<Pose>
     {

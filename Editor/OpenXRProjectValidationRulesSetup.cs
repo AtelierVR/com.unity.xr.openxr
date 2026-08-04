@@ -16,6 +16,9 @@ using Unity.XR.CoreUtils.Editor;
 using UnityEditor.XR.Management;
 using UnityEngine.XR.Management;
 using UnityEngine;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 
 [assembly: InternalsVisibleTo("UnityEditor.XR.OpenXR.Tests")]
@@ -25,9 +28,17 @@ namespace UnityEditor.XR.OpenXR
     {
         const string k_FeaturesRefreshedSessionKey = "com.unity.xr.openxr.featuresRefreshed";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static lookup table populated once at declaration and never mutated.
+        [NoAutoStaticsCleanup]
+#endif
         static BuildTargetGroup[] s_BuildTargetGroups =
             ((BuildTargetGroup[])Enum.GetValues(typeof(BuildTargetGroup))).Distinct().ToArray();
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Editor UI selection state, unrelated to Play mode sessions.
+        [NoAutoStaticsCleanup]
+#endif
         static BuildTargetGroup s_SelectedBuildTargetGroup = BuildTargetGroup.Unknown;
 
         internal const string OpenXRProjectValidationSettingsPath = "Project/XR Plug-in Management/Project Validation";

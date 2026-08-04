@@ -13,6 +13,9 @@ using UnityEngine.Networking.PlayerConnection;
 using UnityEngine.XR.OpenXR;
 
 using UnityEngine.XR.OpenXR.Features.RuntimeDebugger;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
 {
@@ -89,6 +92,10 @@ namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
     {
         private static class Styles
         {
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI style cache; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_Wrap;
         }
 

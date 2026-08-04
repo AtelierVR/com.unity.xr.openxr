@@ -9,6 +9,9 @@ using UnityEngine.XR.OpenXR.Features;
 using UnityEngine;
 using UnityEngine.XR.OpenXR;
 using Object = UnityEngine.Object;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Editor.Tests")]
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Tests")]
@@ -27,7 +30,7 @@ namespace UnityEditor.XR.OpenXR.Features
         /// <param name="group">build target group to refresh</param>
         public static void RefreshFeatures(BuildTargetGroup group)
         {
-            FeatureHelpersInternal.GetAllFeatureInfo(group);
+            FeatureHelpersInternal.RefreshAllFeatureInfo(group);
         }
 
         /// <summary>
@@ -130,11 +133,36 @@ namespace UnityEditor.XR.OpenXR.Features
                 : FeatureInfoCategory.Feature;
         }
 
-        /// <summary>
-        /// Gets all features for group. If serialized feature instances do not exist, creates them.
-        /// </summary>
-        /// <param name="group">BuildTargetGroup to get feature information for.</param>
-        /// <returns>feature info</returns>
+        static FeatureInfo GetFeatureInfo(OpenXRFeature openXRFeature, BuildTargetGroup group)
+        {
+            var ms = MonoScript.FromScriptableObject(openXRFeature);
+            var path = AssetDatabase.GetAssetPath(ms);
+            var dir = "";
+            if (!string.IsNullOrEmpty(path))
+                dir = Path.GetDirectoryName(path);
+
+            OpenXRFeatureAttribute featureAttr = GetOpenXRFeatureAttribute(openXRFeature.GetType());
+            bool hasLoaderForBuildTarget = featureAttr.CustomRuntimeLoaderBuildTargets?.Length > 0
+                                                && featureAttr.CustomRuntimeLoaderBuildTargets
+                                                .Any(target => BuildPipeline.GetBuildTargetGroup(target) == group);
+
+            FeatureInfo featureInfo = new FeatureInfo
+            {
+                PluginPath = dir,
+                Attribute = featureAttr,
+                HasLoaderForBuildTarget = hasLoaderForBuildTarget,
+                LoaderVersion = hasLoaderForBuildTarget ? OpenXRApiVersion.TryParse(featureAttr.CustomRuntimeLoaderVersion, out var version)
+                                    ? version
+                                    : null
+                                    : null,
+                CustomLoaderName = hasLoaderForBuildTarget ? featureAttr.CustomRuntimeLoaderName : null,
+
+                Feature = openXRFeature,
+                Category = DetermineFeatureCategory(featureAttr.Category)
+            };
+            return featureInfo;
+        }
+
         public static AllFeatureInfo GetAllFeatureInfo(BuildTargetGroup group)
         {
             AllFeatureInfo ret = new()
@@ -142,189 +170,160 @@ namespace UnityEditor.XR.OpenXR.Features
                 Features = new List<FeatureInfo>(),
                 ActiveCustomLoaderFeature = null
             };
-            var openXrPackageSettings = OpenXRPackageSettings.GetOrCreateInstance();
-            var isOpenXrSettingsAMockInstance = ((IPackageSettings2)openXrPackageSettings).IsSettingsLocatorFuncOverriden();
-            var openXrSettings = openXrPackageSettings.GetSettingsForBuildTargetGroup(group);
+
+            // Initialize the FeatureInfo from the OpenXRPackageSettings Object
+            OpenXRPackageSettings openXrPackageSettings = OpenXRPackageSettings.Instance;
+            if (openXrPackageSettings == null)
+                return ret;
+
+            OpenXRSettings openXrSettings = openXrPackageSettings.GetSettingsForBuildTargetGroup(group);
             if (openXrSettings == null)
                 return ret;
 
-            // Find any OpenXRFeatures that are already serialized
-            // Combine features from disk AND from the in-memory array to handle AssetDatabase caching issues
-            IEnumerable<Object> featureAssetsFromDisk = isOpenXrSettingsAMockInstance
-                ? Array.Empty<Object>()
-                : GetPackageSettingsFeatureAssets(openXrPackageSettings);
+            bool isOpenXrSettingsAMockInstance = ((IPackageSettings2)openXrPackageSettings).IsSettingsLocatorFuncOverriden();
+            IEnumerable<OpenXRFeature> openXRFeatures = openXrSettings.features ?? Array.Empty<OpenXRFeature>();
 
-            IEnumerable<Object> featureAssetsFromMemory = openXrSettings.features ?? Array.Empty<Object>();
-
-            // Merge both sources, removing duplicates by object reference
-            var featureAssets = featureAssetsFromDisk
-                .Concat(featureAssetsFromMemory)
-                .Distinct()
-                .ToList();
-
-            var featureAssetsMap = new Dictionary<OpenXRFeatureAttribute, OpenXRFeature>();
-            string buildGroupName = isOpenXrSettingsAMockInstance ? "MockRuntime" : group.ToString();
-            foreach (var featureAsset in featureAssets)
+            foreach (OpenXRFeature openXRFeature in openXRFeatures)
             {
-                if (featureAsset == null || !featureAsset.name.Contains(buildGroupName))
+                if (openXRFeature == null)
+                    continue;
+                OpenXRFeatureAttribute featureAttr = GetOpenXRFeatureAttribute(openXRFeature.GetType());
+                if (featureAttr == null)
+                    continue;
+                if (featureAttr.BuildTargetGroups == null || !featureAttr.BuildTargetGroups.Contains(group))
+                    continue;
+                if (isOpenXrSettingsAMockInstance && !openXRFeature.name.Contains("MockRuntime"))
                     continue;
 
-                foreach (var attr in Attribute.GetCustomAttributes(featureAsset.GetType()))
-                {
-                    if (attr is OpenXRFeatureAttribute featureAttr)
-                    {
-                        featureAssetsMap[featureAttr] = (OpenXRFeature)featureAsset;
-                        break;
-                    }
-                }
+                ret.Features.Add(GetFeatureInfo(openXRFeature, group));
             }
 
-            // Find any features that haven't yet been added to the feature list and create instances of them
-            var all = new List<OpenXRFeature>();
-            var mockRuntimeIsAlreadyInitialized = isOpenXrSettingsAMockInstance && featureAssetsMap.Any();
-            foreach (var featureType in TypeCache.GetTypesWithAttribute<OpenXRFeatureAttribute>())
-            {
-                foreach (Attribute attr in Attribute.GetCustomAttributes(featureType))
-                {
-                    if (attr is not OpenXRFeatureAttribute featureAttr)
-                        continue;
-
-                    if (featureAttr.BuildTargetGroups != null
-                        && !((IList)featureAttr.BuildTargetGroups).Contains(group))
-                        break;
-
-                    if (!featureAssetsMap.TryGetValue(featureAttr, out var featureAsset))
-                    {
-                        // Create a new one
-                        featureAsset = (OpenXRFeature)ScriptableObject.CreateInstance(featureType);
-                        featureAsset.name = featureType.Name + " " + buildGroupName;
-                        AssetDatabase.AddObjectToAsset(featureAsset, openXrSettings);
-                        AssetDatabase.SaveAssets();
-                    }
-
-                    if (featureAsset == null)
-                        break;
-
-                    var ms = MonoScript.FromScriptableObject(featureAsset);
-                    var path = AssetDatabase.GetAssetPath(ms);
-                    var dir = "";
-                    if (!string.IsNullOrEmpty(path))
-                        dir = Path.GetDirectoryName(path);
-
-                    var featureInfo = new FeatureInfo
-                    {
-                        PluginPath = dir,
-                        Attribute = featureAttr,
-                        Feature = featureAsset,
-                        Category = DetermineFeatureCategory(featureAttr.Category)
-                    };
-
-                    if (featureAttr.CustomRuntimeLoaderBuildTargets?.Length > 0)
-                    {
-                        featureInfo.HasLoaderForBuildTarget = featureAttr.CustomRuntimeLoaderBuildTargets
-                            .Select(BuildPipeline.GetBuildTargetGroup)
-                            .Any(targetGroup => targetGroup == group);
-
-                        if (featureInfo.HasLoaderForBuildTarget)
-                        {
-                            featureInfo.LoaderVersion =
-                                OpenXRApiVersion.TryParse(featureAttr.CustomRuntimeLoaderVersion, out var version)
-                                    ? version
-                                    : null;
-                            featureInfo.CustomLoaderName = featureAttr.CustomRuntimeLoaderName;
-                        }
-                    }
-
-                    ret.Features.Add(featureInfo);
-
-                    if (!mockRuntimeIsAlreadyInitialized)
-                        all.Add(featureAsset);
-
-                    break;
-                }
-            }
-
-            if (!mockRuntimeIsAlreadyInitialized)
-            {
-                // Update the feature list
-                var newFeatures = all
-                    .Where(f => f != null)
-                    .OrderByDescending(f => f.priority)
-                    .ThenBy(f => f.nameUi);
-
-                // Populate the internal feature variables for all features
-                bool fieldChanged = false;
-                foreach (var feature in newFeatures)
-                {
-                    if (feature.internalFieldsUpdated)
-                        continue;
-
-                    feature.internalFieldsUpdated = true;
-                    foreach (var attr in feature.GetType().GetCustomAttributes<OpenXRFeatureAttribute>())
-                    {
-                        foreach (var sourceField in attr.GetType().GetFields())
-                        {
-                            var copyField = sourceField.GetCustomAttribute<OpenXRFeatureAttribute.CopyFieldAttribute>();
-                            if (copyField == null)
-                                continue;
-
-                            var targetField = feature.GetType().GetField(
-                                copyField.FieldName,
-                                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-                            if (targetField == null)
-                                continue;
-
-                            // Often, when the instance fields are strings, either the target or source values may have it
-                            // assigned as null or empty string "".
-                            // In this case, we default to an empty string, and only if the field is of string type.
-                            // Otherwise, we may not be able to get accurate comparisons.
-                            var targetFieldValue = targetField.GetValueOrTypeDefault(feature, string.Empty);
-                            var sourceFieldValue = sourceField.GetValueOrTypeDefault(attr, string.Empty);
-
-                            // Only set value if value is different
-                            if (targetFieldValue == null
-                                || !targetFieldValue.Equals(sourceFieldValue))
-                            {
-                                targetField.SetValue(feature, sourceFieldValue);
-                                fieldChanged = true;
-                            }
-                        }
-                    }
-                }
-
-                // Check if features have been added or removed
-                var countChanged = openXrSettings.features == null || openXrSettings.features.Length != newFeatures.Count();
-
-                // Ensure the settings are saved after the features are populated
-                if (fieldChanged || countChanged || !openXrSettings.features.SequenceEqual(newFeatures))
-                {
-                    openXrSettings.features = newFeatures.ToArray();
-                    EditorUtility.SetDirty(openXrSettings);
-                }
-            }
-
-            // Decide which loader to use and API version to request
+            // Initialize the FeatureInfo's Custom Loader if applicable
             if (TryFindCustomLoaderWithHighestPriority(ret.Features, out var customLoader))
                 ret.ActiveCustomLoaderFeature = customLoader;
 
-            // Save custom loader name, if any
-            if (ret.ActiveCustomLoaderFeature.HasValue &&
-                !string.IsNullOrWhiteSpace(ret.ActiveCustomLoaderFeature.Value.CustomLoaderName))
+            return ret;
+        }
+
+#if LIFECYCLE_APIS_AVAILABLE
+        // Reflection cache; results never change at runtime.
+        [NoAutoStaticsCleanup]
+#endif
+        static Dictionary<Type, OpenXRFeatureAttribute> featureAssetsMap = new();
+        static OpenXRFeatureAttribute GetOpenXRFeatureAttribute(Type featureType)
+        {
+            return featureAssetsMap.TryGetValue(featureType, out var attr) ? attr : featureType.GetCustomAttribute<OpenXRFeatureAttribute>(true);
+        }
+
+        public static void RefreshAllFeatureInfo(BuildTargetGroup group)
+        {
+            var openXrPackageSettings = OpenXRPackageSettings.GetOrCreateInstance();
+            if (openXrPackageSettings == null)
+                return;
+            var openXrSettings = openXrPackageSettings.GetSettingsForBuildTargetGroup(group);
+            if (openXrSettings == null)
+                return;
+
+            bool isOpenXrSettingsAMockInstance = ((IPackageSettings2)openXrPackageSettings).IsSettingsLocatorFuncOverriden();
+            string buildGroupName = isOpenXrSettingsAMockInstance ? "MockRuntime" : group.ToString();
+
+            List<OpenXRFeature> allOpenXRFeatures = openXrSettings.features.ToList();
+            featureAssetsMap.Clear();
+
+            // Iterate through all types that have the OpenXRFeatureAttribute, and create ScriptableObjects for the ones that are valid for the current BuildTargetGroup
+            // and not already serialized within the OpenXRSettings found on disk
+            foreach (Type featureType in TypeCache.GetTypesWithAttribute<OpenXRFeatureAttribute>())
             {
-                openXrSettings.customLoaderName = ret.ActiveCustomLoaderFeature.Value.CustomLoaderName;
+                OpenXRFeatureAttribute featureAttribute = GetOpenXRFeatureAttribute(featureType);
+                // Make sure that features of this type are valid for the current build target group
+                if (featureAttribute != null && featureAttribute.BuildTargetGroups != null && !featureAttribute.BuildTargetGroups.Contains(group))
+                    continue;
+
+                // If the type is not currently in the settings found on Disk, create a ScriptableObject for it.
+                if (!allOpenXRFeatures.Any(x => x.GetType().Equals(featureType)))
+                {
+                    // Create a new one
+                    var featureAsset = (OpenXRFeature)ScriptableObject.CreateInstance(featureType);
+                    featureAsset.name = featureType.Name + " " + buildGroupName;
+
+                    allOpenXRFeatures.Add(featureAsset);
+
+                    AssetDatabase.AddObjectToAsset(featureAsset, openXrSettings);
+                    featureAssetsMap[featureAsset.GetType()] = featureAttribute;
+                }
+            }
+
+#if UNITY_EDITOR
+            // Filter out the openXRFeatures which no longer have a OpenXRFeatureAttribute and remove them from
+            // the Settings asset.
+            for (int i = allOpenXRFeatures.Count - 1; i >= 0; i--)
+            {
+                OpenXRFeature feature = allOpenXRFeatures[i];
+                var type = feature.GetType();
+                var attr = type.GetCustomAttribute<OpenXRFeatureAttribute>();
+                if (attr == null)
+                {
+                    AssetDatabase.RemoveObjectFromAsset(feature);
+                    allOpenXRFeatures.RemoveAt(i);
+                }
+            }
+#endif
+
+            foreach (var feature in allOpenXRFeatures)
+            {
+                if (feature.internalFieldsUpdated)
+                    continue;
+
+                feature.internalFieldsUpdated = true;
+                OpenXRFeatureAttribute featureAttribute = feature.GetType().GetCustomAttribute<OpenXRFeatureAttribute>();
+                if (featureAttribute == null)
+                    continue;
+
+                foreach (var sourceField in featureAttribute.GetType().GetFields())
+                {
+                    var copyField = sourceField.GetCustomAttribute<OpenXRFeatureAttribute.CopyFieldAttribute>();
+                    if (copyField == null)
+                        continue;
+
+                    var targetField = feature.GetType().GetField(
+                        copyField.FieldName,
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+                    if (targetField == null)
+                        continue;
+
+                    // Often, when the instance fields are strings, either the target or source values may have it
+                    // assigned as null or empty string "".
+                    // In this case, we default to an empty string, and only if the field is of string type.
+                    // Otherwise, we may not be able to get accurate comparisons.
+                    var targetFieldValue = targetField.GetValueOrTypeDefault(feature, string.Empty);
+                    var sourceFieldValue = sourceField.GetValueOrTypeDefault(featureAttribute, string.Empty);
+
+                    // Only set value if value is different
+                    if (targetFieldValue == null
+                        || !targetFieldValue.Equals(sourceFieldValue))
+                    {
+                        targetField.SetValue(feature, sourceFieldValue);
+                    }
+                }
+            }
+
+            openXrSettings.features = allOpenXRFeatures.ToArray();
+
+            List<FeatureInfo> allFeatureInfo = allOpenXRFeatures.Select(x => GetFeatureInfo(x, group)).ToList();
+            if (TryFindCustomLoaderWithHighestPriority(allFeatureInfo, out var customLoaderFeatureInfo) && !string.IsNullOrWhiteSpace(customLoaderFeatureInfo.CustomLoaderName))
+            {
+                openXrSettings.customLoaderName = customLoaderFeatureInfo.CustomLoaderName;
                 EditorUtility.SetDirty(openXrSettings);
             }
             else if (!string.IsNullOrEmpty(openXrSettings.customLoaderName))
             {
-                // Clear active custom loader feature name
                 openXrSettings.customLoaderName = string.Empty;
                 EditorUtility.SetDirty(openXrSettings);
             }
-
             if (EditorUtility.IsDirty(openXrSettings))
                 AssetDatabase.SaveAssetIfDirty(openXrSettings);
 
-            return ret;
+            AssetDatabase.SaveAssets();
         }
 
         static IEnumerable<Object> GetPackageSettingsFeatureAssets(OpenXRPackageSettings openXrPackageSettings)

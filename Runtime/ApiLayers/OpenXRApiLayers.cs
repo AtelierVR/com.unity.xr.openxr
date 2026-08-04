@@ -25,15 +25,15 @@ namespace UnityEngine.XR.OpenXR
     /// <example>
     /// <para>
     /// This example demonstrates how to check and enable an API layer programmatically:
-    /// <c>
+    /// </para>
+    /// <code>
     /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
     /// if (apiLayersFeature != null &amp;&amp; !apiLayersFeature.apiLayers.IsEnabled("XR_APILAYER_LUNARG_core_validation"))
     /// {
     ///     apiLayersFeature.apiLayers.SetEnabled("XR_APILAYER_LUNARG_core_validation", Architecture.X64, true);
     ///     Debug.Log("Core validation layer enabled");
     /// }
-    /// </c>
-    /// </para>
+    /// </code>
     /// </example>
     /// <seealso cref="ApiLayer"/>
     /// <seealso cref="Features.ApiLayersFeature"/>
@@ -98,15 +98,15 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example shows how to check if a layer is enabled for a specific architecture:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
         ///     bool isEnabled = apiLayersFeature.apiLayers.IsEnabled("XR_APILAYER_LUNARG_core_validation", Architecture.X64);
         ///     Debug.Log($"Core validation layer for x64: {(isEnabled ? "enabled" : "disabled")}");
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public bool IsEnabled(string layerName, Architecture libraryArchitecture) => m_Collection.Find(layer => layer.name == layerName && layer.libraryArchitecture == libraryArchitecture).isEnabled;
 
@@ -124,7 +124,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example demonstrates checking if a layer is enabled for any architecture:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -133,8 +134,7 @@ namespace UnityEngine.XR.OpenXR
         ///         Debug.Log("Core validation layer is enabled for at least one architecture");
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public bool IsEnabled(string layerName) => m_Collection.FindAll(layer => layer.name == layerName).Any(layer => layer.isEnabled == true);
 
@@ -153,7 +153,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example shows how to enable a layer for a specific architecture:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -161,8 +162,7 @@ namespace UnityEngine.XR.OpenXR
         ///     apiLayersFeature.apiLayers.SetEnabled("XR_APILAYER_LUNARG_core_validation", Architecture.X64, true);
         ///     Debug.Log("Core validation layer enabled for x64");
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public void SetEnabled(string layerName, Architecture libraryArchitecture, bool enabled)
         {
@@ -188,7 +188,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example demonstrates enabling a layer using the ApiLayer object:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -200,8 +201,7 @@ namespace UnityEngine.XR.OpenXR
         ///         }
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public void SetEnabled(ApiLayer apiLayer, bool enabled) => SetEnabled(apiLayer.name, apiLayer.libraryArchitecture, enabled);
 
@@ -219,7 +219,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example shows how to disable a layer for all architectures:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -227,8 +228,7 @@ namespace UnityEngine.XR.OpenXR
         ///     apiLayersFeature.apiLayers.SetEnabled("XR_APILAYER_LUNARG_core_validation", false);
         ///     Debug.Log("Core validation layer disabled for all architectures");
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public void SetEnabled(string layerName, bool enabled)
         {
@@ -254,7 +254,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example demonstrates reordering layers by index:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -265,8 +266,7 @@ namespace UnityEngine.XR.OpenXR
         ///         Debug.Log("Layer reordered successfully");
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public bool SetIndex(int originalIndex, int destinationIndex)
         {
@@ -295,7 +295,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example shows how to move a specific layer to the beginning of the list:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -308,8 +309,7 @@ namespace UnityEngine.XR.OpenXR
         ///         Debug.Log("Core validation layer moved to execute first");
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public bool SetIndex(string layerName, Architecture libraryArchitecture, int destinationIndex)
         {
@@ -331,7 +331,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example demonstrates reordering using an ApiLayer object:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -342,8 +343,7 @@ namespace UnityEngine.XR.OpenXR
         ///         Debug.Log($"Layer {layer.name} moved to first position");
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         public bool SetIndex(ApiLayer apiLayer, int destinationIndex) => SetIndex(apiLayer.name, apiLayer.libraryArchitecture, destinationIndex);
 

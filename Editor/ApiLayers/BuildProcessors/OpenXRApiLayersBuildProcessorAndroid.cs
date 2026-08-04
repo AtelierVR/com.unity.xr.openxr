@@ -8,6 +8,9 @@ using UnityEditor.Android;
 using UnityEngine;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR
 {
@@ -25,6 +28,10 @@ namespace UnityEditor.XR.OpenXR
         const string k_AndroidMainPath = "main";
         const string k_AndroidJniLibsPath = "jniLibs";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Build-time state, unrelated to Play mode sessions.
+        [NoAutoStaticsCleanup]
+#endif
         static string s_GradleProjectPath;
 
         public int callbackOrder => 0;

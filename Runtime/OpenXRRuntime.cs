@@ -1,5 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR
 {
@@ -134,6 +137,11 @@ namespace UnityEngine.XR.OpenXR
         ///
         /// Return true and the quit process will continue.  Return false and the quit process will cancel.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Opt out to keep behavior identical to older Unity versions; subscribers are expected to
+        // unsubscribe themselves (see ClearEvents for the test-only bulk clear).
+        [NoAutoStaticsCleanup]
+#endif
         public static event Func<bool> wantsToQuit;
 
         /// <summary>
@@ -143,6 +151,9 @@ namespace UnityEngine.XR.OpenXR
         /// Return true and the restart process will continue.  Return false and the XR loader will be
         /// unloaded and the quit process will begin.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static event Func<bool> wantsToRestart;
 
         /// <summary>

@@ -14,7 +14,7 @@ For information about the available OpenXR features, refer to:
 | OpenXR feature                               | Description |
 | :------------------------------------------- | :------------------------------------------- |
 | [Meta Quest Support](features/metaquest.md) | Enables Meta Quest support for the OpenXR plug-in. |
-| [Composition Layers support](features/compositionlayers.md) | Provides support for rendering high quality images on layer types, such as cylinder, equirect, cube, and more. |
+| [Composition layers](xref:openxr-composition-layers) | Provides support for rendering high quality images on layer types, such as cylinder, equirect, cube, and more. |
 | [XR Performance Settings](features/performance-settings.md) | Lets you provide performance hints to an OpenXR runtime and allows you to get notification when an important aspect of device performance changes. |
 | [Foveated Rendering](features/foveatedrendering.md) | An optimization technique that renders peripheral areas at a lower resolution. Similar to [Quad Views](features/quadviews.md). |
 | [Subsampled layout](features/subsampledlayout.md) | An optimization technique that can improve [Foveated rendering](xref:openxr-foveated-rendering) performance by optimizing eye texture sampling. |

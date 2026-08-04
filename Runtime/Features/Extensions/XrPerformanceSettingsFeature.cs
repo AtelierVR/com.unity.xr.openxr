@@ -4,6 +4,9 @@ using UnityEditor.XR.OpenXR.Features;
 #endif
 using UnityEngine.Events;
 using UnityEngine.XR.OpenXR.NativeTypes;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features.Extensions.PerformanceSettings
 {
@@ -79,6 +82,11 @@ namespace UnityEngine.XR.OpenXR.Features.Extensions.PerformanceSettings
         /// ]]>
         /// </code>
         /// </example>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Opt out to keep behavior identical to older Unity versions; subscribers are expected to
+        // unsubscribe themselves.
+        [NoAutoStaticsCleanup]
+#endif
         public static event UnityAction<PerformanceChangeNotification> OnXrPerformanceChangeNotification;
 
         /// <summary>

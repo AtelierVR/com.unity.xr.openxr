@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine.XR.OpenXR;
 using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR
 {
@@ -23,6 +26,10 @@ namespace UnityEditor.XR.OpenXR
             public List<IXRLoaderMetadata> loaderMetadata { get; set; }
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static configuration/metadata value, never mutated at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         private static IXRPackageMetadata s_Metadata = new MyPackageMetadata()
         {
             packageName = "OpenXR XR Plugin",
@@ -48,8 +55,7 @@ namespace UnityEditor.XR.OpenXR
         {
             try
             {
-                EditorBuildSettings.AddConfigObject(Constants.k_SettingsKey, obj, true);
-                return true;
+                return OpenXRPackageSettings.RegisterOpenXRPackageSettings(obj);
             }
             catch (System.Exception ex)
             {

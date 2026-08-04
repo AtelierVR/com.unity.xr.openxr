@@ -7,6 +7,9 @@ using UnityEngine.Networking.PlayerConnection;
 using UnityEditor.XR.OpenXR.Features;
 using UnityEditor.XR.OpenXR.Features.RuntimeDebugger;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features.RuntimeDebugger
 {
@@ -25,7 +28,14 @@ namespace UnityEngine.XR.OpenXR.Features.RuntimeDebugger
 #endif
     public class RuntimeDebuggerOpenXRFeature : OpenXRFeature
     {
+#if LIFECYCLE_APIS_AVAILABLE
+        // Constant message-routing identifiers, never mutated at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         internal static readonly Guid kEditorToPlayerRequestDebuggerOutput = new Guid("B3E6DED1-C6C7-411C-BE58-86031A0877E7");
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static readonly Guid kPlayerToEditorSendDebuggerOutput = new Guid("B3E6DED1-C6C7-411C-BE58-86031A0877E8");
 
         /// <summary>

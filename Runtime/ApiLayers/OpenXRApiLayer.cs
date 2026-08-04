@@ -17,7 +17,8 @@ namespace UnityEngine.XR.OpenXR
         /// <example>
         /// <para>
         /// This example shows how to check if a specific API layer is enabled:
-        /// <c>
+        /// </para>
+        /// <code>
         /// ApiLayersFeature apiLayersFeature = OpenXRSettings.Instance.GetFeature&lt;ApiLayersFeature&gt;();
         /// if (apiLayersFeature != null)
         /// {
@@ -29,8 +30,7 @@ namespace UnityEngine.XR.OpenXR
         ///         }
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         /// <seealso cref="ApiLayers"/>
         /// <seealso cref="Features.ApiLayersFeature"/>

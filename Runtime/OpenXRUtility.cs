@@ -2,6 +2,9 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using UnityEngine.XR;
 using UnityEngine;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR
 {
@@ -55,6 +58,11 @@ namespace UnityEngine.XR.OpenXR
         /// </summary>
         public static bool IsUserPresent => Internal_GetUserPresence();
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Scratch buffer: cleared and refilled by SubsystemManager.GetSubsystems on every call, so there's
+        // no cross-session state to reset.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly List<XRDisplaySubsystem> s_DisplaySubsystems = new List<XRDisplaySubsystem>();
 
         internal static XRDisplaySubsystem GetFirstDisplaySubsystem()

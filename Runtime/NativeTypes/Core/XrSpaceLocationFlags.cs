@@ -6,7 +6,7 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
     /// Space Location bit flags. <see cref="Features.Mock.MockRuntime.SetSpace"/>
     /// </summary>
     [Flags]
-    public enum XrSpaceLocationFlags
+    public enum XrSpaceLocationFlags : ulong
     {
         /// <summary>
         /// Default space location flag.

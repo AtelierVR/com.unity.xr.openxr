@@ -12,6 +12,9 @@ using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 using UnityEditor.Build;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Tests")]
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Editor.Tests")]
@@ -83,12 +86,25 @@ namespace UnityEngine.XR.OpenXR.Features.Mock
         /// <param name="result">The XrResult of the function.</param>
         public delegate void AfterFunctionDelegate(string functionName, XrResult result);
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already explicitly cleared by ClearFunctionCallbacks(), called from OnInstanceDestroy; opt out
+        // to keep behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         static Dictionary<string, AfterFunctionDelegate> s_AfterFunctionCallbacks;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static Dictionary<string, BeforeFunctionDelegate> s_BeforeFunctionCallbacks;
 
         /// <summary>
         /// Subscribe delegates to ScriptEvents.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already explicitly cleared by ResetDefaults(); opt out to keep behavior identical to older
+        // Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         public static event ScriptEventDelegate onScriptEvent;
 
         /// <summary>
@@ -267,6 +283,11 @@ namespace UnityEngine.XR.OpenXR.Features.Mock
 
         public ulong XrSession { get; private set; } = 0ul;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Deliberate test-configuration flag that controls whether callbacks survive an instance
+        // restart; must not be silently reset on Play mode entry.
+        [NoAutoStaticsCleanup]
+#endif
         static bool s_KeepFunctionCallbacks;
 
         internal static bool KeepFunctionCallbacks

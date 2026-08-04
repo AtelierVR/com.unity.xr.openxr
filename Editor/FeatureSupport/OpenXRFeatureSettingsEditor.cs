@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.Features;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features
 {
@@ -8,12 +11,22 @@ namespace UnityEditor.XR.OpenXR.Features
     {
         struct Styles
         {
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI style cache; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_WrapTextLabel;
         }
 
         struct Content
         {
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIContent k_NoSelectionTitleContent = new("OpenXR Feature Settings");
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIContent k_NoSelectionHelpMsg = new("There is no current feature selected for the this build target. Go to Player Settings->XR Plug-in Management->OpenXR to select a settings for a feature to edit.");
         }
 

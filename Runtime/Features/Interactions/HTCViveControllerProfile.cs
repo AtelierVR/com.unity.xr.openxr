@@ -168,7 +168,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
                 menu = GetChildControl<ButtonControl>("menu");
                 trigger = GetChildControl<AxisControl>("trigger");
                 triggerPressed = GetChildControl<ButtonControl>("triggerPressed");
-                trackpad = GetChildControl<StickControl>("trackpad");
+                trackpad = GetChildControl<ThumbstickControl>("trackpad");
                 trackpadClicked = GetChildControl<ButtonControl>("trackpadClicked");
                 trackpadTouched = GetChildControl<ButtonControl>("trackpadTouched");
 

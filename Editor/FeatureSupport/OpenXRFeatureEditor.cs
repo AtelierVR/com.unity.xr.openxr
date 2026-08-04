@@ -7,6 +7,9 @@ using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
 
 using UnityEditorInternal;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features
 {
@@ -48,22 +51,56 @@ namespace UnityEditor.XR.OpenXR.Features
             public const float k_DefaultSelectionWidth = 200f;
             public const float k_DefaultLineMultiplier = 2f;
 
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI style caches; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_SelectionStyle = "TV Selection";
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_SelectionBackground = "ScrollViewAlt";
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_FeatureSetTitleLabel;
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_ListLabel;
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_ListSelectedLabel;
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_Feature;
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static GUIStyle s_FeatureSettings;
         }
 
         static class Content
         {
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_HelpIcon = EditorGUIUtility.IconContent("_Help");
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_SettingsIcon = EditorGUIUtility.IconContent("Settings");
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_Settings = new(
                 "", k_SettingsIcon.image, "Open settings editor for this feature.");
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             public static readonly GUIContent k_InteractionProfilesTitle = new("Enabled Interaction Profiles");
         }
 
@@ -90,6 +127,10 @@ namespace UnityEditor.XR.OpenXR.Features
 
         bool mustInitializeFeatures = true;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Constant label, never mutated at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly string s_AllFeatures = "All Features";
 
         public OpenXRFeatureEditor()

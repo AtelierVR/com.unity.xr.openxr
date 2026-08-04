@@ -62,6 +62,11 @@ namespace UnityEngine.XR.OpenXR
     {
         const string K_defaultOpenXRLoaderName = "openxr_loader";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Subscribers (e.g. PollEventRouter) self-unsubscribe when this fires, so opt out to keep
+        // behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         internal static Action<OpenXRLoaderBase> deinitializedInternal;
 
         class FeatureLoggingInfo
@@ -83,13 +88,25 @@ namespace UnityEngine.XR.OpenXR
         List<FeatureLoggingInfo> featureLoggingInfo;
 
         const double k_IdlePollingWaitTimeInSeconds = 0.1;
+#if LIFECYCLE_APIS_AVAILABLE
+        // Scratch buffers refilled on every call to CreateSubsystem.
+        [NoAutoStaticsCleanup]
+#endif
         static List<XRDisplaySubsystemDescriptor> s_DisplaySubsystemDescriptors = new();
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static List<XRInputSubsystemDescriptor> s_InputSubsystemDescriptors = new();
 
         /// <summary>
         /// Represents the running OpenXRLoader instance. This value should be non null after calling
         /// Initialize until a subsequent call to DeInitialize is made.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already explicitly cleared to null in a finally block in Deinitialize(), so opt out to keep
+        // behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         internal static OpenXRLoaderBase Instance { get; private set; }
 
         internal enum LoaderState
@@ -581,19 +598,15 @@ namespace UnityEngine.XR.OpenXR
 
                 // Store feature logging info to be logged later.
                 // We need to log this after we've determined the version of the OpenXR Runtime
+                var featureExtensions = feature.GetExtensions();
                 featureLoggingInfo.Add(new FeatureLoggingInfo(
-                    feature.nameUi, feature.version, feature.company, feature.openxrExtensionStrings));
+                    feature.nameUi, feature.version, feature.company, string.Join(" ", featureExtensions)));
 
                 // First try to enable any of the feature's OpenXR extension Strings
-                if (!string.IsNullOrEmpty(feature.openxrExtensionStrings))
+                foreach (var extensionString in featureExtensions)
                 {
-                    // Check to see if any of the required extensions are not supported by the runtime
-                    foreach (var extensionString in feature.openxrExtensionStrings.Split(' '))
-                    {
-                        // Request each extension.
-                        if (string.IsNullOrWhiteSpace(extensionString)) continue;
-                        Internal_RequestEnableExtensionString(extensionString);
-                    }
+                    // Request each extension.
+                    Internal_RequestEnableExtensionString(extensionString);
                 }
 
                 // Then try to request any OpenXR API Versions requested by the extensions

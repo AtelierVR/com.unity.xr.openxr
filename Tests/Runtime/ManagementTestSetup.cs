@@ -81,8 +81,11 @@ namespace UnityEngine.XR.TestTooling
             AssetDatabase.AddObjectToAsset(testManager, xrGeneralSettings);
 
             AssetDatabase.SaveAssets();
-
+#if UNITY_6000_7_OR_NEWER
+            EditorBuildSettings.AddConfigObject(XRGeneralSettings.settingsKey, buildTargetSettings, true);
+#else
             EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, buildTargetSettings, true);
+#endif
 
 #endif
         }
@@ -90,7 +93,11 @@ namespace UnityEngine.XR.TestTooling
         public virtual void TearDownTest()
         {
 #if UNITY_EDITOR
+#if UNITY_6000_7_OR_NEWER
+            EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.settingsKey);
+#else
             EditorBuildSettings.RemoveConfigObject(XRGeneralSettings.k_SettingsKey);
+#endif
             buildTargetSettings = null;
             testManager = null;
             xrGeneralSettings = null;

@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using AOT;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.NativeTypes
 {
@@ -21,7 +24,16 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
     /// </summary>
     public static class PollEventRouter
     {
+#if LIFECYCLE_APIS_AVAILABLE
+        // These collections are already explicitly cleared in ClearAllState (below) whenever the OpenXR
+        // loader deinitializes, so opt out of Unity's automatic statics-cleanup rather than have it also
+        // manage them on Play mode entry/exit. This keeps behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly HashSet<XrPollEventCallback> s_SubscribersToAllEvents = new();
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static readonly Dictionary<XrStructureType, HashSet<XrPollEventCallback>> s_TypedEventSubscribers = new();
         static int numSubscribersToEventReceived => s_SubscribersToAllEvents.Count + s_TypedEventSubscribers.Count;
 
@@ -45,6 +57,11 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
             Internal_UnregisterPollEventCallback();
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Function pointer for a static method; the value never becomes stale and doesn't need to be
+        // recomputed between Play mode sessions.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly unsafe IntPtr s_XrPollEventCallback =
             Marshal.GetFunctionPointerForDelegate((XrPollEventCallback)OnXrPollEvent);
 

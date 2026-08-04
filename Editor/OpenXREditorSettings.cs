@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using System.Runtime.CompilerServices;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 [assembly: InternalsVisibleTo("Unity.XRTesting")]
 namespace UnityEditor.XR.OpenXR
@@ -13,7 +16,14 @@ namespace UnityEditor.XR.OpenXR
     {
         public static OpenXREditorSettings Instance => OpenXREditorSettings.GetInstance();
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Editor settings singleton, unrelated to Play mode sessions; must not be reset on Play mode entry.
+        [NoAutoStaticsCleanup]
+#endif
         static OpenXREditorSettings s_Instance = null;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static object s_Lock = new object();
 
         static string GetAssetPathForComponents(string[] pathComponents)

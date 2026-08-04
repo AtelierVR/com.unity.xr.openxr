@@ -6,7 +6,7 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
     /// Runtime view state flags. <see cref="Features.Mock.MockRuntime.SetViewState"/>
     /// </summary>
     [Flags]
-    public enum XrViewStateFlags
+    public enum XrViewStateFlags : ulong
     {
         /// <summary>
         /// Default view state flag.

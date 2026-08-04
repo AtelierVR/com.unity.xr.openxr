@@ -124,7 +124,6 @@ namespace UnityEngine.XR.OpenXR.Tests
             XR_PERFORMANCE_METRICS_COUNTER_UNIT_MAX_ENUM_META = 0x7FFFFFFF
         }
 
-        [Ignore("Disabled pending investigation: values appear to be off by 1000x, likely a unit conversion bug (ms vs s). See branch chrisf/disable_testallmetrics_until_fixed.")]
         [UnityTest]
         public IEnumerator TestAllMetrics()
         {
@@ -176,7 +175,20 @@ namespace UnityEngine.XR.OpenXR.Tests
                         ProviderXRStats.TryGetStat(displays[0], unityStatString, out var stat),
                         "did not get stat for " + unityStatString
                     );
-                    Assert.That(stat, Is.EqualTo((float)i).Within(0.001));
+
+                    // The native plugin converts GPU frame time from OpenXR milliseconds to seconds
+                    // for these function-based stats, which Unity's IUnityXRStats display subsystem
+                    // contract requires to be in seconds (unlike the raw perfmetrics.* stat equivalents).
+                    bool isMillisecondsToSecondsStat =
+                        unityStatString == kUnityStatsAppGpuTimeFunc ||
+                        unityStatString == kUnityStatsCompositorGpuTimeFunc;
+                    float expectedValue = isMillisecondsToSecondsStat ? (float)i / 1000.0f : (float)i;
+
+                    // Use a tight tolerance for ms→s converted stats: the seeded values increase by
+                    // 0.001 per frame (i/1000), so a tolerance of 0.001 would pass even if the stat
+                    // returned the previous frame's value rather than the current one.
+                    float tolerance = isMillisecondsToSecondsStat ? 1e-5f : 0.001f;
+                    Assert.That(stat, Is.EqualTo(expectedValue).Within(tolerance));
                 }
             }
         }

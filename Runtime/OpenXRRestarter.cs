@@ -7,6 +7,9 @@ using UnityEngine.XR.Management;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR
 {
@@ -46,16 +49,30 @@ namespace UnityEngine.XR.OpenXR
         /// </summary>
         public bool isRunning => m_Coroutine != null;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // This class has an explicit static constructor, which is incompatible with [AutoStaticsCleanup]
+        // (Unity would emit UAL0014). Opting out preserves current behavior exactly.
+        [NoAutoStaticsCleanup]
+#endif
         private static OpenXRRestarter s_Instance = null;
 
         private Coroutine m_Coroutine;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static int m_pauseAndRestartCoroutineCount = 0;
 
         private Object m_PauseAndRestartCoroutineCountLock = new Object();
 
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static int m_pauseAndRestartAttempts = 0;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static float TimeBetweenRestartAttempts
         {
             get;
@@ -101,6 +118,9 @@ namespace UnityEngine.XR.OpenXR
         /// If true, disables the application quitting, even when Quit is called.
         /// Used in testing, which needs to monitor for Quit to be called.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static bool DisableApplicationQuit
         {
             get;

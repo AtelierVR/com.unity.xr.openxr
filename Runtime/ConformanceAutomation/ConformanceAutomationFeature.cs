@@ -4,6 +4,9 @@ using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
 using UnityEditor.XR.OpenXR.Features;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features.ConformanceAutomation
 {
@@ -29,7 +32,15 @@ namespace UnityEngine.XR.OpenXR.Features.ConformanceAutomation
         /// </summary>
         public const string featureId = "com.unity.openxr.feature.conformance";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already explicitly reset to 0 in OnInstanceDestroy/OnSessionDestroy; opt out to keep behavior
+        // identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         private static ulong xrInstance = 0ul;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static ulong xrSession = 0ul;
 
         /// <inheritdoc/>

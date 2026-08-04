@@ -4,6 +4,9 @@ using System.Linq;
 using UnityEditor.XR.Management;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.Features;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features
 {
@@ -11,8 +14,18 @@ namespace UnityEditor.XR.OpenXR.Features
     {
         public const float k_IconSize = 16.0f;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static UI label/icon caches; content never changes at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         public static readonly GUIContent k_LoaderName = new("OpenXR");
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static readonly GUIContent k_OpenXRHelp = new("You may need to configure additional settings for OpenXR to enable features and interactions for different runtimes.");
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static readonly GUIContent k_OpenXRHelpIcon = new("", CommonContent.k_HelpIcon.image, k_OpenXRHelp.text);
     }
 

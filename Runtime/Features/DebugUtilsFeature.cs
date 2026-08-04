@@ -20,7 +20,8 @@ namespace UnityEngine.XR.OpenXR.Features
     /// <example>
     /// <para>
     /// This example shows how to configure the Debug Utils feature to receive only error and warning messages:
-    /// <c>
+    /// </para>
+    /// <code>
     /// OpenXRSettings settings = OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Standalone);
     /// DebugUtilsFeature debugUtilsFeature = settings.GetFeature&lt;DebugUtilsFeature&gt;();
     /// if (debugUtilsFeature != null)
@@ -28,8 +29,7 @@ namespace UnityEngine.XR.OpenXR.Features
     ///     debugUtilsFeature.messageSeverity = DebugUtilsFeature.MessageSeverity.Error | DebugUtilsFeature.MessageSeverity.Warning;
     ///     debugUtilsFeature.messageType = DebugUtilsFeature.MessageType.Validation | DebugUtilsFeature.MessageType.Performance;
     /// }
-    /// </c>
-    /// </para>
+    /// </code>
     /// </example>
     /// <seealso cref="ApiLayersFeature"/>
     /// <seealso cref="MessageSeverity"/>
@@ -59,15 +59,15 @@ namespace UnityEngine.XR.OpenXR.Features
         /// <example>
         /// <para>
         /// This example demonstrates how to configure message severity filtering:
-        /// <c>
+        /// </para>
+        /// <code>
         /// DebugUtilsFeature debugUtils = OpenXRSettings.Instance.GetFeature&lt;DebugUtilsFeature&gt;();
         /// // Receive only error messages
         /// debugUtils.messageSeverity = DebugUtilsFeature.MessageSeverity.Error;
         ///
         /// // Receive warnings and errors
         /// debugUtils.messageSeverity = DebugUtilsFeature.MessageSeverity.Warning | DebugUtilsFeature.MessageSeverity.Error;
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         [Flags]
         public enum MessageSeverity
@@ -105,15 +105,15 @@ namespace UnityEngine.XR.OpenXR.Features
         /// <example>
         /// <para>
         /// This example shows how to configure message type filtering for validation and performance messages:
-        /// <c>
+        /// </para>
+        /// <code>
         /// DebugUtilsFeature debugUtils = OpenXRSettings.Instance.GetFeature&lt;DebugUtilsFeature&gt;();
         /// // Receive only validation messages
         /// debugUtils.messageType = DebugUtilsFeature.MessageType.Validation;
         ///
         /// // Receive validation and performance messages
         /// debugUtils.messageType = DebugUtilsFeature.MessageType.Validation | DebugUtilsFeature.MessageType.Performance;
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         [Flags]
         public enum MessageType
@@ -208,7 +208,8 @@ namespace UnityEngine.XR.OpenXR.Features
         /// <para>
         /// This method is called automatically by the OpenXR loader. You typically don't need to call it directly.
         /// However, you can override it in a derived class to add custom initialization:
-        /// <c>
+        /// </para>
+        /// <code>
         /// public class CustomDebugUtils : DebugUtilsFeature
         /// {
         ///     protected internal override IntPtr HookGetInstanceProcAddr(IntPtr hookGetInstanceProcAddr)
@@ -217,8 +218,7 @@ namespace UnityEngine.XR.OpenXR.Features
         ///         return base.HookGetInstanceProcAddr(hookGetInstanceProcAddr);
         ///     }
         /// }
-        /// </c>
-        /// </para>
+        /// </code>
         /// </example>
         protected internal override IntPtr HookGetInstanceProcAddr(IntPtr hookGetInstanceProcAddr)
         {

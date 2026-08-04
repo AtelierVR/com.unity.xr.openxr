@@ -9,6 +9,9 @@ using UnityEngine.XR.OpenXR.Input;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 #if USE_INPUT_SYSTEM_POSE_CONTROL
 using PoseControl = UnityEngine.InputSystem.XR.PoseControl;
@@ -121,7 +124,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             public QuaternionControl pointerRotation { get; private set; }
 
             /// <summary>
-            /// Internal call used to assign controls to the the correct element.
+            /// Internal call used to assign controls to the correct element.
             /// </summary>
             protected override void FinishSetup()
             {
@@ -175,6 +178,11 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
         /// <summary>
         /// Temporary flag for warning users that HoloLens will be deprecated
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already toggled from false by OnEnabledChange itself; opt out to keep behavior identical to
+        // older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         private static bool wasHoloLensEnabled = false;
 
         /// <summary>

@@ -218,13 +218,13 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             public ButtonControl thumbProximity { get; private set; }
 
             /// <summary>
-            /// Internal call used to assign controls to the the correct element.
+            /// Internal call used to assign controls to the correct element.
             /// </summary>
             protected override void FinishSetup()
             {
                 base.FinishSetup();
 
-                thumbstick = GetChildControl<StickControl>("thumbstick");
+                thumbstick = GetChildControl<ThumbstickControl>("thumbstick");
                 trigger = GetChildControl<AxisControl>("trigger");
                 triggerPressed = GetChildControl<ButtonControl>("triggerPressed");
                 triggerTouched = GetChildControl<ButtonControl>("triggerTouched");

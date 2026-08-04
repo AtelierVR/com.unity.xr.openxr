@@ -1,10 +1,12 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace UnityEngine.XR.OpenXR.NativeTypes
 {
     /// <summary>
     /// The persistence component. Provided by `XR_EXT_spatial_persistence`.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public readonly struct XrSpatialPersistenceDataEXT : IEquatable<XrSpatialPersistenceDataEXT>
     {
         /// <summary>

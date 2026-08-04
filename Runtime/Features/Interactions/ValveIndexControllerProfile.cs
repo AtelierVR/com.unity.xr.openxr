@@ -228,10 +228,10 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
                 trigger = GetChildControl<AxisControl>("trigger");
                 triggerPressed = GetChildControl<ButtonControl>("triggerPressed");
                 triggerTouched = GetChildControl<ButtonControl>("triggerTouched");
-                thumbstick = GetChildControl<StickControl>("thumbstick");
+                thumbstick = GetChildControl<ThumbstickControl>("thumbstick");
                 thumbstickClicked = GetChildControl<ButtonControl>("thumbstickClicked");
                 thumbstickTouched = GetChildControl<ButtonControl>("thumbstickTouched");
-                trackpad = GetChildControl<StickControl>("trackpad");
+                trackpad = GetChildControl<ThumbstickControl>("trackpad");
                 trackpadTouched = GetChildControl<ButtonControl>("trackpadTouched");
                 trackpadForce = GetChildControl<AxisControl>("trackpadForce");
                 devicePose = GetChildControl<PoseControl>("devicePose");

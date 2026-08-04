@@ -13,6 +13,9 @@ using System.Linq;
 #if XR_MGMT_4_4_0_OR_NEWER
 using Unity.XR.Management.AndroidManifest.Editor;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features.MetaQuestSupport
 {
@@ -252,6 +255,10 @@ namespace UnityEditor.XR.OpenXR.Features.MetaQuestSupport
                 && openXRSettings != null && openXRSettings.foveatedRenderingApi == OpenXRSettings.BackendFovationApi.QuadViews;
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static lookup table populated once at declaration and never mutated.
+        [NoAutoStaticsCleanup]
+#endif
         private static string[] openXREyeTrackingExtensionStrings = { "XR_META_foveation_eye_tracked", "XR_EXT_eye_gaze_interaction" };
 
         private static bool IsEyeTrackingRequired()
@@ -259,9 +266,15 @@ namespace UnityEditor.XR.OpenXR.Features.MetaQuestSupport
             var openXRFeatures = OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Android).GetFeatures();
             foreach (var feature in openXRFeatures)
             {
+                if (!feature.enabled)
+                    continue;
+
+                // Use GetExtensions() so that features can conditionally suppress eye tracking extensions
+                // (e.g. FoveatedRenderingFeature with UseEyeTracking=false will not return XR_META_foveation_eye_tracked)
+                var extensions = feature.GetExtensions();
                 for (int i = 0; i < openXREyeTrackingExtensionStrings.Length; i++)
                 {
-                    if (feature.enabled && !string.IsNullOrEmpty(feature.openxrExtensionStrings) && feature.openxrExtensionStrings.Contains(openXREyeTrackingExtensionStrings[i], StringComparison.InvariantCulture))
+                    if (Array.IndexOf(extensions, openXREyeTrackingExtensionStrings[i]) >= 0)
                     {
                         return true;
                     }

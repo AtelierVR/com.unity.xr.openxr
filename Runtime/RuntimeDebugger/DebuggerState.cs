@@ -13,6 +13,9 @@ using TreeViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
 using UnityEngine;
 using UnityEngine.Networking.PlayerConnection;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Features.RuntimeDebugger.Editor")]
 namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
@@ -43,13 +46,34 @@ namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
         };
 
         private const byte FileVersion = 2;
+#if LIFECYCLE_APIS_AVAILABLE
+        // Constant magic-number header, never mutated at runtime.
+        [NoAutoStaticsCleanup]
+#endif
         private static readonly byte[] Header = new byte[] { 0xea, 0x24, 0x39, 0x5c, 0xe0, 0xac, 0x79, FileVersion };
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Already explicitly cleared by Clear()/LoadFromFile(); opt out to keep behavior identical to
+        // older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         internal static List<FunctionCall> _functionCalls = new List<FunctionCall>();
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static List<byte> saveToFile = new List<byte>(Header);
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static byte openedFileVersion = FileVersion;
 
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static Dictionary<UInt32, Dictionary<UInt64, HandleDebugEvent>> xrLut = new Dictionary<UInt32, Dictionary<UInt64, HandleDebugEvent>>();
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static List<string> lutNames = new List<string>();
 
         internal static void Clear()
@@ -61,9 +85,21 @@ namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
             openedFileVersion = FileVersion;
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static Action _doneCallback;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static UInt32 _lastPayloadSize;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static UInt32 _frameCount;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static UInt32 _lutSize;
 
         internal static void SetDoneCallback(Action done)
@@ -71,6 +107,10 @@ namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
             _doneCallback = done;
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Scratch buffer; cleared before every use in ReadString().
+        [NoAutoStaticsCleanup]
+#endif
         private static StringBuilder _sb = new StringBuilder();
         internal static string ReadString(BinaryReader r)
         {
@@ -204,6 +244,10 @@ namespace UnityEditor.XR.OpenXR.Features.RuntimeDebugger
 
         internal class DebugEvent : TreeViewItem
         {
+#if LIFECYCLE_APIS_AVAILABLE
+            // ID generation counter; should persist to maintain uniqueness across Play mode sessions.
+            [NoAutoStaticsCleanup]
+#endif
             private static int idCounter = 1;
             private List<DebugEvent> childrenEvents = new List<DebugEvent>();
             protected string fieldname;

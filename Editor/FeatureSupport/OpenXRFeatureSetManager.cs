@@ -5,6 +5,9 @@ using UnityEditor.MPE;
 using UnityEngine;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR.Features
 {
@@ -100,6 +103,11 @@ namespace UnityEditor.XR.OpenXR.Features
             public bool wasEnabled;
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Populated once via [InitializeOnLoadMethod], which doesn't re-run on Play mode transitions, so
+        // opt out to keep behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         static Dictionary<BuildTargetGroup, List<FeatureSetInfo>> s_AllFeatureSets;
 
         struct FeatureSetState
@@ -110,17 +118,28 @@ namespace UnityEditor.XR.OpenXR.Features
             public HashSet<string> defaultToEnabledFeatureIds;
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Reflects the project's feature-set configuration; unrelated to Play mode sessions.
+        [NoAutoStaticsCleanup]
+#endif
         static Dictionary<BuildTargetGroup, FeatureSetState> s_FeatureSetState = new();
 
         /// <summary>
         /// Event called when the feature set state has been changed.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static event Action<BuildTargetGroup> onFeatureSetStateChanged;
 
         /// <summary>
         /// The current active build target. Used to handle callbacks from <see cref="OpenXRFeature.enabled" /> into
         /// <see cref="CanFeatureBeDisabled" /> to determine if a feature can currently be disabled.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Editor UI/build-target selection state, unrelated to Play mode sessions.
+        [NoAutoStaticsCleanup]
+#endif
         public static BuildTargetGroup activeBuildTarget = BuildTargetGroup.Unknown;
 
         static void FillKnownFeatureSets(bool addTestFeatureSet = false)
@@ -272,6 +291,7 @@ namespace UnityEditor.XR.OpenXR.Features
                     s_FeatureSetState.Add(buildTargetGroup, fsi);
                 }
 
+                FeatureHelpers.RefreshFeatures(buildTargetGroup);
                 SetFeaturesFromEnabledFeatureSets(buildTargetGroup);
             }
         }

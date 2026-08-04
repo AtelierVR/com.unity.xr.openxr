@@ -6,6 +6,9 @@ using UnityEditor;
 #endif
 using UnityEngine.Rendering;
 using UnityEngine.XR.OpenXR.NativeTypes;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features
 {
@@ -33,10 +36,32 @@ namespace UnityEngine.XR.OpenXR.Features
         /// <summary>
         /// Get whether Vulkan subsampled layout is currently enabled.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static bool isSubsampledLayoutEnabled { get; private set; }
 
         [SerializeField]
         bool enableSubsampledLayout;
+
+        /// <summary>
+        /// When enabled, the eye tracking OpenXR extension (<c>XR_META_foveation_eye_tracked</c>) is
+        /// requested and eye tracking android permissions / manifest flags are written at build time, if the device supports it
+        /// Disable this if you want foveated rendering without eye tracking.
+        /// Enabled by default so existing projects are unaffected.
+        /// </summary>
+        [SerializeField]
+        bool useEyeTracking = true;
+
+        /// <summary>
+        /// Gets or sets whether eye tracking is used for foveated rendering.
+        /// When <see langword="false"/>, the eye tracking extension is not requested and
+        /// eye tracking android permissions are not added to the manifest.
+        /// </summary>
+        public bool UseEyeTracking => useEyeTracking;
+
+        private const string k_EyeTrackingExtension = "XR_META_foveation_eye_tracked";
+
 #if UNITY_EDITOR
         private bool SettingsUseVulkan()
         {
@@ -146,19 +171,34 @@ namespace UnityEngine.XR.OpenXR.Features
         internal class FoveatedRenderingFeatureEditor : Editor
         {
             private SerializedProperty subsampledLayout;
+            private SerializedProperty useEyeTracking;
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI label caches; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             static GUIContent s_SubsampledLayout = EditorGUIUtility.TrTextContent("Subsampled Layout (Vulkan)", "An optimization technique that can improve foveated rendering performance by optimizing eye texture sampling.");
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
+            static GUIContent s_UseEyeTracking = EditorGUIUtility.TrTextContent("Use Eye Tracking", "When enabled, the eye tracking OpenXR extension is requested and eye tracking Android permissions are added to the manifest. Disable to use foveated rendering without eye tracking.");
 
 #if UNITY_6000_0_OR_NEWER
             private SerializedProperty foveatedRenderingApi;
             private SerializedObject openXRSettings;
             private BuildTargetGroup selectedBuildSettings;
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             private static readonly GUIContent[] k_foveatedRenderingApiOptions = new GUIContent[2]
             {
                 new GUIContent("Legacy"),
                 new GUIContent("SRP Foveation"),
             };
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
 #if UNITY_6000_5_OR_NEWER
             private static readonly GUIContent[] k_androidfoveatedRenderingApiOptions = new GUIContent[3]
             {
@@ -174,12 +214,16 @@ namespace UnityEngine.XR.OpenXR.Features
             };
 #endif
 
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             private static readonly GUIContent k_foveatedRenderingApiLabel = new GUIContent("Foveated Rendering Method", "Choose the foveated rendering api.");
 #endif
 
             void OnEnable()
             {
                 subsampledLayout = serializedObject.FindProperty("enableSubsampledLayout");
+                useEyeTracking = serializedObject.FindProperty("useEyeTracking");
 
 #if UNITY_6000_0_OR_NEWER
                 selectedBuildSettings = EditorUserBuildSettings.selectedBuildTargetGroup;
@@ -210,6 +254,7 @@ namespace UnityEngine.XR.OpenXR.Features
                 EditorGUIUtility.labelWidth = 300.0f;
                 serializedObject.Update();
                 EditorGUILayout.PropertyField(subsampledLayout, s_SubsampledLayout);
+                EditorGUILayout.PropertyField(useEyeTracking, s_UseEyeTracking);
 #if UNITY_6000_0_OR_NEWER
 
                 var currentSettings = OpenXRSettings.GetSettingsForBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
@@ -283,11 +328,20 @@ namespace UnityEngine.XR.OpenXR.Features
         }
 
         /// <inheritdoc />
+        protected internal override bool ShouldUseExtension(string ext)
+        {
+            if (!useEyeTracking && ext == k_EyeTrackingExtension)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <inheritdoc />
         protected internal override bool OnInstanceCreate(ulong instance)
         {
             // If using BiRP, the feature must know not to use the newer API for FSR/FDM
             Internal_Unity_SetUseFoveatedRenderingLegacyMode(GraphicsSettings.defaultRenderPipeline == null);
-
             TrySetSubsampledLayoutEnabled(enableSubsampledLayout);
 
             return base.OnInstanceCreate(instance);

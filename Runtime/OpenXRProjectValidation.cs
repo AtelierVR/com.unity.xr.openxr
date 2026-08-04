@@ -10,6 +10,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if XR_COMPOSITION_LAYERS
 using UnityEngine.XR.OpenXR.Features.CompositionLayers;
 #endif
@@ -27,10 +30,25 @@ namespace UnityEditor.XR.OpenXR
         const string K_openXrLoaderLibName = "openxr_loader";
         const string K_unsupportedLoaderNameChar = ".";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Editor-only cached validation state; unrelated to Play mode sessions, so opt out to keep behavior
+        // identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         private static bool isValidationMessagePrinted = false;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static bool isValidPath = false;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static string invalidPath = "";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static lookup table populated once at declaration and never mutated.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly OpenXRFeature.ValidationRule[] BuiltinValidationRules =
         {
             new()
@@ -285,6 +303,10 @@ namespace UnityEditor.XR.OpenXR
 #endif
         };
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Scratch buffer refilled by GetAllValidationIssues on every call.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly List<OpenXRFeature.ValidationRule> CachedValidationList = new(BuiltinValidationRules.Length);
 
         internal static void EnableInputSystemPoseControlDefine()

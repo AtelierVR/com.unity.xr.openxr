@@ -129,7 +129,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             /// <summary>
             /// A [QuaternionControl](xref:UnityEngine.InputSystem.Controls.QuaternionControl) required for backwards compatibility with the XRSDK layouts. This is the device orientation. This value is equivalent to mapping gripPose/rotation.
             /// </summary>
-            [Preserve, InputControl(offset = 20, noisy = true, alias = "gripRotation")]
+            [Preserve, InputControl(offset = 20, noisy = true, aliases = new[] { "gripRotation", "gripOrientation" })]
             new public QuaternionControl deviceRotation { get; private set; }
             /// <summary>
             /// A [Vector3Control](xref:UnityEngine.InputSystem.Controls.Vector3Control) required for backwards compatibility with the XRSDK layouts. This is the aim position. This value is equivalent to mapping aimPose/position.
@@ -139,7 +139,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             /// <summary>
             /// A [QuaternionControl](xref:UnityEngine.InputSystem.Controls.QuaternionControl) required for backwards compatibility with the XRSDK layouts. This is the aim orientation. This value is equivalent to mapping aimPose/rotation.
             /// </summary>
-            [Preserve, InputControl(offset = 80, noisy = true)]
+            [Preserve, InputControl(offset = 80, noisy = true, alias = "pointerOrientation")]
             public QuaternionControl pointerRotation { get; private set; }
             /// <summary>
             /// A [Vector3Control](xref:UnityEngine.InputSystem.Controls.Vector3Control) required for backwards compatibility with the XRSDK layouts. This is the poke position. This value is equivalent to mapping pokePose/position.
@@ -163,7 +163,7 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             public QuaternionControl pinchRotation { get; private set; }
 
             /// <summary>
-            /// Internal call used to assign controls to the the correct element.
+            /// Internal call used to assign controls to the correct element.
             /// </summary>
             protected override void FinishSetup()
             {

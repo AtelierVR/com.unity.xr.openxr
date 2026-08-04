@@ -165,14 +165,14 @@ namespace UnityEngine.XR.OpenXR.Features.Interactions
             public HapticControl haptic { get; private set; }
 
             /// <summary>
-            /// Internal call used to assign controls to the the correct element.
+            /// Internal call used to assign controls to the correct element.
             /// </summary>
             protected override void FinishSetup()
             {
                 base.FinishSetup();
-                joystick = GetChildControl<StickControl>("joystick");
+                joystick = GetChildControl<ThumbstickControl>("joystick");
                 trigger = GetChildControl<AxisControl>("trigger");
-                touchpad = GetChildControl<StickControl>("touchpad");
+                touchpad = GetChildControl<ThumbstickControl>("touchpad");
                 grip = GetChildControl<AxisControl>("grip");
                 gripPressed = GetChildControl<ButtonControl>("gripPressed");
                 menu = GetChildControl<ButtonControl>("menu");

@@ -6,6 +6,9 @@ using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEditor.XR.OpenXR.Features;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features
 {
@@ -24,7 +27,8 @@ namespace UnityEngine.XR.OpenXR.Features
     /// <example>
     /// <para>
     /// This example demonstrates how to programmatically access and configure API layers at runtime:
-    /// <c>
+    /// </para>
+    /// <code>
     /// OpenXRSettings settings = OpenXRSettings.GetSettingsForBuildTargetGroup(BuildTargetGroup.Standalone);
     /// ApiLayersFeature apiLayersFeature = settings.GetFeature&lt;ApiLayersFeature&gt;();
     /// if (apiLayersFeature != null &amp;&amp; apiLayersFeature.enabled)
@@ -33,8 +37,7 @@ namespace UnityEngine.XR.OpenXR.Features
     ///     apiLayersFeature.apiLayers.SetEnabled("XR_APILAYER_LUNARG_core_validation", Architecture.X64, true);
     ///     Debug.Log($"API layers configured: {apiLayersFeature.apiLayers.collection.Count} layers available");
     /// }
-    /// </c>
-    /// </para>
+    /// </code>
     /// </example>
     /// <seealso cref="ApiLayers"/>
     /// <seealso cref="ApiLayers.ISupport"/>
@@ -57,6 +60,11 @@ namespace UnityEngine.XR.OpenXR.Features
         /// A unique identifier for this feature.
         /// </summary>
         public const string featureId = "com.unity.openxr.feature.apilayers";
+#if LIFECYCLE_APIS_AVAILABLE
+        // Support objects re-register themselves every Play session via RuntimeInitializeOnLoadMethod, and
+        // AddSupport() already de-dupes, so opting out keeps behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         static List<ApiLayers.ISupport> s_ApiLayersSupport = new List<ApiLayers.ISupport>();
 
         /// <summary>

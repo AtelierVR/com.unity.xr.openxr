@@ -14,6 +14,9 @@ using UnityEngine.XR.OpenXR.Features.Interactions;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif // UNITY_EDITOR
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Input
 {
@@ -77,6 +80,10 @@ namespace UnityEngine.XR.OpenXR.Input
         /// <summary>
         /// Dictionary that provides a conversion between InputSystem.ExpectedControlType to OpenXRInteractionFeature.ActionType
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Static lookup table populated once at declaration and never mutated.
+        [NoAutoStaticsCleanup]
+#endif
         private static readonly Dictionary<string, OpenXRInteractionFeature.ActionType> ExpectedControlTypeToActionType = new Dictionary<string, OpenXRInteractionFeature.ActionType>
         {
             // Binary
@@ -109,6 +116,9 @@ namespace UnityEngine.XR.OpenXR.Input
         /// <summary>
         /// Dictionary used to map virtual controls to concrete controls.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         private static readonly Dictionary<string, string> kVirtualControlMap = new Dictionary<string, string>
         {
             ["deviceposition"] = s_devicePoseActionName,
@@ -151,9 +161,7 @@ namespace UnityEngine.XR.OpenXR.Input
 #else
             InputSystem.InputSystem.RegisterLayout<PoseControl>("Pose");
 #endif //USE_INPUT_SYSTEM_POSE_CONTROL
-#if UNITY_INPUT_SYSTEM_ENABLE_XR
             InputSystem.InputSystem.RegisterLayout<OpenXRDevice>();
-#endif
             InputSystem.InputSystem.RegisterLayout<OpenXRHmd>(matches: new InputDeviceMatcher()
                 .WithInterface(XRUtilities.InterfaceMatchAnyVersion)
                 .WithProduct(@"Head Tracking - OpenXR")

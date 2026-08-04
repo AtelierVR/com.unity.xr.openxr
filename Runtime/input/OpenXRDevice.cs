@@ -18,23 +18,14 @@ namespace UnityEngine.XR.OpenXR.Input
         {
             base.FinishSetup();
 
-#if UNITY_INPUT_SYSTEM_ENABLE_XR
-            var capabilities = description.capabilities;
-            var deviceDescriptor = XRDeviceDescriptor.FromJson(capabilities);
-
+#if ENABLE_VR || UNITY_GAMECORE // UnityEngine.InputSystem.XR.XRDeviceDescriptor.characteristics is guarded with these defines starting with com.unity.inputsystem@1.14.2
+            var deviceDescriptor = XRDeviceDescriptor.FromJson(description.capabilities);
             if (deviceDescriptor != null)
             {
-#if UNITY_6000_0_OR_NEWER
                 if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Left) != 0)
                     InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.LeftHand);
                 else if ((deviceDescriptor.characteristics & InputDeviceCharacteristics.Right) != 0)
                     InputSystem.InputSystem.SetDeviceUsage(this, InputSystem.CommonUsages.RightHand);
-#else
-                if (deviceDescriptor.deviceRole == InputDeviceRole.LeftHanded)
-                    InputSystem.SetDeviceUsage(this, CommonUsages.LeftHand);
-                else if (deviceDescriptor.deviceRole == InputDeviceRole.RightHanded)
-                    InputSystem.SetDeviceUsage(this, CommonUsages.RightHand);
-#endif //UNITY_2019_3_OR_NEWER
             }
 #endif
         }

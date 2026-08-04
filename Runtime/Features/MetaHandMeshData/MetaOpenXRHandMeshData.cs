@@ -10,6 +10,9 @@ using UnityEngine.XR.Hands.Meshing;
 using UnityEngine.XR.Hands.Meshing.ProviderImplementation;
 using UnityEngine.XR.Hands.OpenXR;
 using UnityEngine.XR.Hands.OpenXR.Meshing;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 #if UNITY_ANDROID
 using UnityEngine.Android;
 #endif
@@ -261,6 +264,10 @@ namespace UnityEngine.XR.OpenXR.Features.Meta
             Debug.LogWarning("Hand Tracking Subsystem feature is not enabled - subsystem APIs for hand mesh data will fail.");
         }
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Scratch buffer, explicitly cleared after every use.
+        [NoAutoStaticsCleanup]
+#endif
         static List<XRHandSubsystem> s_SubsystemsReuse = new List<XRHandSubsystem>();
 
 #if UNITY_EDITOR

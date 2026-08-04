@@ -40,7 +40,7 @@ namespace UnityEditor.XR.OpenXR
                         ret = AssetDatabase.LoadAssetAtPath(path, typeof(OpenXRPackageSettings)) as OpenXRPackageSettings;
                         if (ret != null)
                         {
-                            EditorBuildSettings.AddConfigObject(Constants.k_SettingsKey, ret, true);
+                            RegisterOpenXRPackageSettings(ret);
                         }
 
                         // Can't modify EditorBuildSettings once a build has already started - it won't get picked up
@@ -59,18 +59,47 @@ namespace UnityEditor.XR.OpenXR
             if (Instance != null)
                 return Instance;
 
-            var settings = CreateInstance<OpenXRPackageSettings>();
+            return CreateScriptableObjectInstance();
+        }
+
+        static OpenXRPackageSettings CreateScriptableObjectInstance()
+        {
+            OpenXRPackageSettings settings = CreateInstance<OpenXRPackageSettings>();
             if (settings != null)
             {
                 string path = OpenXRPackageSettingsAssetPath();
                 if (!string.IsNullOrEmpty(path))
                 {
                     AssetDatabase.CreateAsset(settings, path);
-                    EditorBuildSettings.AddConfigObject(Constants.k_SettingsKey, settings, true);
+                    RegisterOpenXRPackageSettings(settings);
                     AssetDatabase.SaveAssets();
+                    return settings;
                 }
             }
-            return settings;
+
+            Debug.LogError("Error attempting to create instance of OpenXR Package Settings.");
+            return null;
+        }
+
+
+        /// <summary>
+        /// Registers the OpenXRPackageSettings asset with the Editor Build Settings
+        /// </summary>
+        /// <param name="settingObj"></param>
+        public static bool RegisterOpenXRPackageSettings(ScriptableObject settingObj)
+        {
+            string originalAssetPath = AssetDatabase.GetAssetPath(settingObj);
+            if (!string.IsNullOrEmpty(originalAssetPath) && Path.GetFullPath(originalAssetPath) != Path.GetFullPath(OpenXRPackageSettingsAssetPath()))
+            {
+                string errorMsg = AssetDatabase.MoveAsset(originalAssetPath, OpenXRPackageSettingsAssetPath());
+                if (!string.IsNullOrEmpty(errorMsg))
+                {
+                    Debug.LogError(errorMsg);
+                    return false;
+                }
+            }
+            EditorBuildSettings.AddConfigObject(Constants.k_SettingsKey, settingObj, true);
+            return true;
         }
 
         string IPackageSettings.PackageSettingsAssetPath()
@@ -147,6 +176,7 @@ namespace UnityEditor.XR.OpenXR
                 ret.name = buildTargetGroup.ToString();
 
                 AssetDatabase.AddObjectToAsset(ret, this);
+                AssetDatabase.SaveAssets();
             }
 
             return ret;

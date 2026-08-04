@@ -3,6 +3,9 @@ using UnityEngine.XR.OpenXR.NativeTypes;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features
 {
@@ -119,6 +122,10 @@ namespace UnityEngine.XR.OpenXR.Features
         internal class SpaceWarpFeatureSettingsEditor : Editor
         {
             private SerializedProperty useRightHandedNDC;
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI label cache; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             static GUIContent s_UseRightHandedNDC = EditorGUIUtility.TrTextContent("Use Right Handed NDC");
 
             void OnEnable()

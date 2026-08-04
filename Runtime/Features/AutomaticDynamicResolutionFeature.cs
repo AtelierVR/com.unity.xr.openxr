@@ -7,6 +7,9 @@ using UnityEngine.Rendering.Universal;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features
 {
@@ -135,6 +138,9 @@ namespace UnityEngine.XR.OpenXR.Features
         /// Call <see cref="SetUsingSuggestedResolutionScale"/> to change this value.
         /// Only the getter is public.
         /// </remarks>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         public static bool usingSuggestedResolutionScale { get; private set; } = true;
 
         /// <inheritdoc />
@@ -194,11 +200,18 @@ namespace UnityEngine.XR.OpenXR.Features
             // variables to store the state of the min resolution scalar slider
             private float prevMinResolutionScalar;
             private SerializedProperty minResolutionScalar;
+#if LIFECYCLE_APIS_AVAILABLE
+            // Static UI label cache; content never changes at runtime.
+            [NoAutoStaticsCleanup]
+#endif
             static GUIContent s_MinResolutionLabel = EditorGUIUtility.TrTextContent("Min Resolution Scalar");
 
             // variables to store the state of the max resolution scalar slider
             private float prevMaxResolutionScalar;
             private SerializedProperty maxResolutionScalar;
+#if LIFECYCLE_APIS_AVAILABLE
+            [NoAutoStaticsCleanup]
+#endif
             static GUIContent s_MaxResolutionLabel = EditorGUIUtility.TrTextContent("Max Resolution Scalar");
 
             void OnEnable()

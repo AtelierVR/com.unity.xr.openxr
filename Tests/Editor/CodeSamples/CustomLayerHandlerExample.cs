@@ -7,6 +7,8 @@ using UnityEditor.Build.Reporting;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
 using UnityEngine.XR.OpenXR.CompositionLayers;
+using UnityEngine.XR.OpenXR.NativeTypes;
+using Unity.XR.CompositionLayers.Services;
 
 namespace UnityEngine.XR.OpenXR.CodeSamples.Editor.Tests
 {
@@ -62,12 +64,32 @@ namespace UnityEngine.XR.OpenXR.CodeSamples.Editor.Tests
             }
         }
     }
+
+    internal class CustomQuadLayerData : Unity.XR.CompositionLayers.Layers.QuadLayerData { }
+
+    // Minimal, self-contained handler used only so this sample compiles on its own.
+    // Refer to Samples~/CustomCompositionLayerFeature/CustomLayerHandler.cs for a full implementation.
+    internal class CustomLayerHandler : OpenXRCustomLayerHandler<XrCompositionLayerQuad>
+    {
+        protected override bool CreateSwapchain(CompositionLayerManager.LayerInfo layerInfo, out SwapchainCreateInfo swapchainCreateInfo)
+        {
+            swapchainCreateInfo = default;
+            return false;
+        }
+
+        protected override bool CreateNativeLayer(CompositionLayerManager.LayerInfo layerInfo, SwapchainCreatedOutput swapchainOutput, out XrCompositionLayerQuad nativeLayer)
+        {
+            nativeLayer = default;
+            return false;
+        }
+
+        protected override bool ModifyNativeLayer(CompositionLayerManager.LayerInfo layerInfo, ref XrCompositionLayerQuad nativeLayer)
+        {
+            return false;
+        }
+    }
 }
 #endif
 #endregion
 // Used in Documentation~/features/compositionlayers.md
 // This example demonstrates how to create and register a custom composition layer handler.
-
-#if XR_COMPOSITION_LAYERS
-private class CustomQuadLayerData : Unity.XR.CompositionLayers.Layers.QuadLayerData { }
-#endif

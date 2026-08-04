@@ -6,7 +6,8 @@
   "xref": [
         "com.unity.xr.compositionlayers",
         "com.unity.xr.hands@1.9",
-        "com.unity.xr.interaction.toolkit"
+        "com.unity.xr.interaction.toolkit",
+        "com.unity.xr.meta-openxr"
         ],
   "pmdt-additional-preprocessors": "XR_COMPOSITION_LAYERS",
   "additional-dependencies": {

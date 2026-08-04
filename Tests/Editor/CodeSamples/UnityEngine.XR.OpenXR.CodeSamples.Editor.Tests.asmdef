@@ -6,7 +6,8 @@
         "Unity.XR.OpenXR.Editor",
         "Unity.XR.OpenXR.Features.MockRuntime",
         "UnityEditor.TestRunner",
-        "Unity.XR.OpenXR.TestTooling"
+        "Unity.XR.OpenXR.TestTooling",
+        "Unity.XR.CompositionLayers"
     ],
     "includePlatforms": [
         "Editor"

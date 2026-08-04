@@ -5,6 +5,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.XR.Management;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEngine.XR.OpenXR.Features
 {
@@ -18,7 +21,15 @@ namespace UnityEngine.XR.OpenXR.Features
         /// <summary>
         /// Temporary static list used for action map creation
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        // Only ever non-null for the duration of a single CreateActionMaps call, which already resets it
+        // to null when done; opt out to keep behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         static List<ActionMapConfig> m_CreatedActionMaps;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static Dictionary<InteractionProfileType, Dictionary<string, bool>> m_InteractionProfileEnabledMaps = new();
 
         /// <summary>
@@ -298,6 +309,11 @@ namespace UnityEngine.XR.OpenXR.Features
         }
 
 #if UNITY_EDITOR && ENABLE_CLOUD_SERVICES_ANALYTICS && UNITY_ANALYTICS
+#if LIFECYCLE_APIS_AVAILABLE
+        // Deduplication cache for analytics sends; opt out so it keeps suppressing redundant sends across
+        // Play sessions rather than resending on every entry.
+        [NoAutoStaticsCleanup]
+#endif
         static readonly Dictionary<string, (string[] actions, string[] augmented)> s_LastPayloadPerFeature = new();
 #endif
 
@@ -495,7 +511,7 @@ namespace UnityEngine.XR.OpenXR.Features
                 GUILayout.Label(warningText, EditorStyles.wordWrappedLabel);
                 EditorGUILayout.EndHorizontal();
 
-                if(GUILayout.Button("Manage Interaction Profiles"))
+                if (GUILayout.Button("Manage Interaction Profiles"))
                      SettingsService.OpenProjectSettings("Project/XR Plug-in Management/OpenXR");
                 EditorGUILayout.Space();
                 EditorGUILayout.EndVertical();

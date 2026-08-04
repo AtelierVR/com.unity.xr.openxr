@@ -10,6 +10,9 @@ using UnityEngine.XR.OpenXR.NativeTypes;
 using UnityEditor;
 using System.Linq;
 #endif
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Editor")]
 [assembly: InternalsVisibleTo("Unity.XR.OpenXR.Features.MetaQuestSupport.Editor")]
@@ -27,6 +30,11 @@ namespace UnityEngine.XR.OpenXR.Features
     public abstract partial class OpenXRFeature : ScriptableObject
     {
 #if UNITY_EDITOR
+#if LIFECYCLE_APIS_AVAILABLE
+        // Assigned once via [InitializeOnLoadMethod], which doesn't re-run on Play mode transitions, so
+        // opt out to keep behavior identical to older Unity versions.
+        [NoAutoStaticsCleanup]
+#endif
         internal static Func<string, bool> canSetFeatureDisabled;
 #endif
         /// <summary>
@@ -42,6 +50,9 @@ namespace UnityEngine.XR.OpenXR.Features
         /// <summary>
         /// True if a required feature failed initialization, false if all features initialized successfully.
         /// </summary>
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         internal static bool requiredFeatureFailed { get; private set; }
 
         /// <summary>
@@ -102,6 +113,28 @@ namespace UnityEngine.XR.OpenXR.Features
         /// May contain multiple extensions separated by spaces.
         /// </summary>
         [HideInInspector] [SerializeField] internal string openxrExtensionStrings;
+
+        /// <summary>
+        /// Returns whether the given OpenXR extension string should be requested at runtime.
+        /// Called once per extension declared in <see cref="OpenXRFeatureAttribute"/> <c>OpenxrExtensionStrings</c>.
+        /// Override to conditionally suppress individual extensions.
+        /// </summary>
+        /// <param name="ext">The extension name string to evaluate.</param>
+        /// <returns><see langword="true"/> to request the extension; <see langword="false"/> to skip it.</returns>
+        protected internal virtual bool ShouldUseExtension(string ext) => true;
+
+        /// <summary>
+        /// Returns the filtered set of OpenXR extension strings this feature wants to request,
+        /// based on <see cref="ShouldUseExtension"/>.
+        /// </summary>
+        /// <returns>Array of OpenXR extension strings. Empty if none are needed.</returns>
+        protected internal string[] GetExtensions()
+        {
+            if (string.IsNullOrEmpty(openxrExtensionStrings))
+                return Array.Empty<string>();
+            return Array.FindAll(openxrExtensionStrings.Split(' '),
+                e => !string.IsNullOrWhiteSpace(e) && ShouldUseExtension(e));
+        }
 
         /// <summary>
         /// Automatically filled out by the build process from OpenXRFeatureAttribute.
@@ -464,7 +497,7 @@ namespace UnityEngine.XR.OpenXR.Features
             OpenXRApiVersion apiVersion = OpenXRApiVersion.TryParse(targetOpenXRApiVersion, out var version) ? version : null;
             if (apiVersion != null)
             {
-                if(apiVersion.Major != OpenXRApiVersion.Current.Major)
+                if (apiVersion.Major != OpenXRApiVersion.Current.Major)
                 {
                     rules.Add(new ValidationRule(this)
                     {

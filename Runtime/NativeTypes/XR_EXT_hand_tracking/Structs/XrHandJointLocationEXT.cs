@@ -6,9 +6,9 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
     public readonly struct XrHandJointLocationEXT
     {
         /// <summary>
-        /// A bitfield of <see cref="XrSpaceLocationFlags"/> describing the validity of the pose.
+        /// Flags describing the validity and tracking state of the joint pose.
         /// </summary>
-        public ulong locationFlags { get; }
+        public XrSpaceLocationFlags locationFlags { get; }
 
         /// <summary>
         /// The pose of the hand joint.
@@ -23,11 +23,11 @@ namespace UnityEngine.XR.OpenXR.NativeTypes
         /// <summary>
         /// Construct an instance.
         /// </summary>
-        /// <param name="locationFlags">A bitfield describing the validity of the pose.</param>
+        /// <param name="locationFlags">Flags describing the validity and tracking state of the joint pose.</param>
         /// <param name="pose">The pose of the hand joint.</param>
         /// <param name="radius">The radius of the hand joint in meters.</param>
         public XrHandJointLocationEXT(
-            ulong locationFlags, XrPosef pose, float radius)
+            XrSpaceLocationFlags locationFlags, XrPosef pose, float radius)
         {
             this.locationFlags = locationFlags;
             this.pose = pose;

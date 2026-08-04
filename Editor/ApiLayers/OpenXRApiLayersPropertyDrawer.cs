@@ -4,6 +4,9 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace UnityEditor.XR.OpenXR
 {
@@ -24,7 +27,14 @@ namespace UnityEditor.XR.OpenXR
         // Serialization property name
         const string k_ApiLayersProperty = "m_Collection";
 
+#if LIFECYCLE_APIS_AVAILABLE
+        // Editor UI selection state, unrelated to Play mode sessions.
+        [NoAutoStaticsCleanup]
+#endif
         static ApiLayersFeature s_SelectedApiLayersFeature;
+#if LIFECYCLE_APIS_AVAILABLE
+        [NoAutoStaticsCleanup]
+#endif
         static BuildTargetGroup s_SelectedBuildTargetGroup;
 
         ReorderableList m_ReorderableList;

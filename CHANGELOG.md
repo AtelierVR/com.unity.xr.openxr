@@ -9,6 +9,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 > When updating the Changelog, please ensure we follow the standards for ordering headers as outlined here: [US-0039](https://standards.ds.unity3d.com/Standards/US-0039/). Specifically: Under ## headers, ### \<type\> headers are listed in this order: Added, Changed, Deprecated, Removed, Fixed, Security
 -->
 
+## [1.18.0] - 2026-08-04
+
+### Added
+
+* Added `gripOrientation` and `pointerOrientation` as aliases for `deviceRotation` and `pointerRotation` in `HandInteractionProfile`.
+* Added `palmOrientation` as an alias for `palmRotation` in `PalmPoseInteraction`.
+
+### Changed
+
+* Changed [`AndroidMouseInteractionProfile.AndroidMouseInteraction`](xref:UnityEngine.XR.OpenXR.Features.Interactions.AndroidMouseInteractionProfile.AndroidMouseInteraction) to have its `aim` control type declared as either `UnityEngine.InputSystem.XR.PoseControl` or `UnityEngine.XR.OpenXR.Input.PoseControl` based on `USE_INPUT_SYSTEM_POSE_CONTROL` in Scripting Define Symbols under Player settings, matching the other interaction input devices. This is potentially a breaking change if you did not opt-in to the Project Validation rule "Switch to use InputSystem.XR.PoseControl instead of OpenXR.Input.PoseControl, which will be deprecated in a future release." If you were referencing the `aim` property directly through scripting, or reading the value of an input action with a binding to that control, you may need to adjust the type of struct you read.
+
+### Removed
+
+* Removed redundant `palmPosition` and `palmRotation` aliases from `devicePosition` and `deviceRotation` in `PalmPoseInteraction`.
+
+### Fixed
+
+* Fixed `XrSpaceLocationFlags` and `XrViewStateFlags` underlying type to `ulong` (`XrFlags64`) so their sizes match the OpenXR spec.
+* Fixed `XrSpatialPersistenceDataEXT` to use 4-byte alignment instead of 8-byte alignment, correctly aligning its size with the OpenXR C ABI.
+* Fixed [`PalmPoseInteraction.PalmPose`](xref:UnityEngine.XR.OpenXR.Features.Interactions.PalmPoseInteraction.PalmPose) input device not finishing setup of all input control properties where the input control properties other than `palmPose` were `null`.
+* Fixed `OpenXRHmd` input device not finishing setup of the `userPresence` input control property.
+* Fixed some input devices not setting up the `StickControl`/`Vector2Control` input control properties correctly when `USE_STICK_CONTROL_THUMBSTICKS` scripting define symbol was not defined in the project.
+* Fixed several regressions from package version 1.17.0 caused by "Fixed compilation errors when OpenXR was present in Unity projects targeting non-XR supported platforms.":
+  * Fixed the Android Mouse Interaction (OpenXR) [`AndroidMouseInteractionProfile.AndroidMouseInteraction`](xref:UnityEngine.XR.OpenXR.Features.Interactions.AndroidMouseInteractionProfile.AndroidMouseInteraction) input device not having the `aim` property.
+  * Fixed the [`OpenXRDevice`](xref:UnityEngine.XR.OpenXR.Input.OpenXRDevice) not setting `{LeftHand}`/`{RightHand}` input device usages. This affects some derived input devices such as Hand Interaction Poses (OpenXR) ([`HandCommonPosesInteraction.HandInteractionPoses`](xref:UnityEngine.XR.OpenXR.Features.Interactions.HandCommonPosesInteraction.HandInteractionPoses)).
+  * Fixed the `OpenXRDevice` not being registered with the Input System as a base layout.
+  * Fixed some conditions for enabling Project Validation rules related to D-Pad Binding and Palm Pose features when only the Eye Gaze Interaction Profile is enabled.
+  * Fixed an issue where package setting assets would be refreshed on Unity Editor startup, causing import errors. This was implemented by separating refreshing OpenXR Features from querying OpenXR Features.
+  * Fixed compilation errors caused by lack of StaticCleanup attributes in Unity 6.7.
+
 ## [1.18.0-pre.2] - 2026-06-16
 
 ### Fixed
@@ -48,6 +78,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Changed behavior of Meta Quest build profile to automatically enable suggested controllers and Meta Quest Support.
 * Updated Hand Mesh Data documentation to clarify the exact feature label in OpenXR Project Settings, supported build targets (Android and Standalone), and automatic Android manifest configuration details.
 * Use OpenXR Delta Time opts to not use the deltaTime value provided by the runtime when the setting is false.
+* Changed behavior of Quad Views to allow developers to selectively use eye tracking.
 
 ### Fixed
 
@@ -81,7 +112,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fixed compilation errors when OpenXR was present in Unity projects targeting non-XR supported platforms.
 * Fixed a problem with feature settings window so that it is no longer cleared after a domain reload.
 * Fixed a problem with feature validation so that all features are refreshed when we first gather validation rules.
-* Fixed compilation errors when OpenXR was present in Unity projects targeting non-XR supported platforms.
 * Fixed a problem with OpenXR API Layers so that we now set the correct path when running on Windows Standalone build.
 * Fixed modification of the OpenXR Package Settings asset every time a project was re-opened in the Unity Editor. ([UUM-138181](https://issuetracker.unity3d.com/product/unity/issues/guid/UUM-138181))
 
