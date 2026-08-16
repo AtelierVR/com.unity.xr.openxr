@@ -82,7 +82,7 @@ namespace UnityEditor.XR.OpenXR
                 get
                 {
                     string str = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Khronos\OpenXR\1", "ActiveRuntime", "");
-#if UNITY_EDITOR_OSX
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
                     str = File.Exists("/usr/local/share/openxr/1/active_runtime.json") ? "/usr/local/share/openxr/1/active_runtime.json" : "";
 #endif
                     return str;
@@ -228,7 +228,7 @@ namespace UnityEditor.XR.OpenXR
             private static string GetRuntimeJsonPath(string packageAssetPath)
             {
                 var runtimePath = Path.Combine(packageAssetPath, Path.Combine("MetaXRSimulator", "meta_openxr_simulator_win64.json"));
-#if UNITY_EDITOR_OSX
+#if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
                 runtimePath = Path.Combine(Path.GetFullPath(packageAssetPath), Path.Combine("MetaXRSimulator", "meta_openxr_simulator_posix.json"));
 #endif
                 if (!File.Exists(runtimePath))

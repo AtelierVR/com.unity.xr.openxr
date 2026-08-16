@@ -24,6 +24,8 @@ namespace UnityEditor.XR.OpenXR.Features
                 .Where(importer => importer.GetCompatibleWithPlatform(BuildTarget.StandaloneWindows64) && importer.assetPath.EndsWith(".dll"))
 #elif UNITY_EDITOR_OSX
                 .Where(importer => importer.GetCompatibleWithPlatform(BuildTarget.StandaloneOSX) && importer.assetPath.EndsWith(".dylib"))
+#elif UNITY_EDITOR_LINUX
+                .Where(importer => importer.GetCompatibleWithPlatform(BuildTarget.StandaloneLinux64) && importer.assetPath.EndsWith(".so"))
 #endif
                 ;
 

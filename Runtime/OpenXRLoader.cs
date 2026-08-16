@@ -34,7 +34,7 @@ namespace UnityEngine.XR.OpenXR
     /// Loader for the OpenXR Plug-in. Used by [XR Plug-in Management](https://docs.unity3d.com/Packages/com.unity.xr.management@latest) to manage OpenXR lifecycle.
     /// </summary>
 #if UNITY_EDITOR
-    [XRSupportedBuildTarget(BuildTargetGroup.Standalone, new[] {BuildTarget.StandaloneWindows64})]
+    [XRSupportedBuildTarget(BuildTargetGroup.Standalone, new[] {BuildTarget.StandaloneWindows64, BuildTarget.StandaloneLinux64})]
     [XRSupportedBuildTarget(BuildTargetGroup.Android)]
 #endif
     public class OpenXRLoader : OpenXRLoaderBase
@@ -557,6 +557,8 @@ namespace UnityEngine.XR.OpenXR
 #elif UNITY_EDITOR_OSX
             // no loader for osx, use the mock by default
             loaderPath = $"../../MockRuntime/osx/{K_defaultOpenXRLoaderName}";
+#elif UNITY_EDITOR_LINUX
+            loaderPath = $"../../../RuntimeLoaders/linux/{K_defaultOpenXRLoaderName}";
 #endif
 
 #if UNITY_EDITOR

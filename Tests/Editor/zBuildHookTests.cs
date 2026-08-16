@@ -171,6 +171,8 @@ namespace UnityEditor.XR.OpenXR.Tests
             var ext = "dll";
             if (Application.platform == RuntimePlatform.OSXEditor)
                 ext = "dylib";
+            else if (Application.platform == RuntimePlatform.LinuxEditor)
+                ext = "so";
 
             var dlls = dir.EnumerateFiles($"*.{ext}", SearchOption.AllDirectories).Select(s => s.Name).ToList();
             return dlls.Contains($"openxr_loader.{ext}") || dlls.Contains($"UnityOpenXR.{ext}");

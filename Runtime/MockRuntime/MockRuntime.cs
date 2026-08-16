@@ -31,7 +31,7 @@ namespace UnityEngine.XR.OpenXR.Features.Mock
         Desc = "Mock runtime extension for automated testing.",
         DocumentationLink = Constants.k_DocumentationManualURL + "mock-environment.html",
 #if !OPENXR_USE_KHRONOS_LOADER
-        CustomRuntimeLoaderBuildTargets = new[] { BuildTarget.StandaloneWindows64, BuildTarget.StandaloneOSX, BuildTarget.Android },
+        CustomRuntimeLoaderBuildTargets = new[] { BuildTarget.StandaloneWindows64, BuildTarget.StandaloneLinux64, BuildTarget.StandaloneOSX, BuildTarget.Android },
 #endif
         OpenxrExtensionStrings = XR_UNITY_null_gfx + " " + XR_UNITY_android_present,
         Version = "0.0.2",

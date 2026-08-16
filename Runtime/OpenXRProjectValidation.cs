@@ -197,8 +197,8 @@ namespace UnityEditor.XR.OpenXR
             },
             new()
             {
-                message = "The only standalone targets supported are Windows x64 and OSX with OpenXR.  Other architectures and operating systems are not supported at this time.",
-                checkPredicate = () => (BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget) != BuildTargetGroup.Standalone) || (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64) || (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneOSX),
+                message = "The only standalone targets supported are Windows x64, Linux x64 and OSX with OpenXR.  Other architectures and operating systems are not supported at this time.",
+                checkPredicate = () => (BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget) != BuildTargetGroup.Standalone) || (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64) || (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneLinux64) || (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneOSX),
                 fixIt = () => EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64),
                 fixItMessage = "Switch active build target to StandaloneWindows64.",
                 error = true,
