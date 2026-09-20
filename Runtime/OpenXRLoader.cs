@@ -543,9 +543,11 @@ namespace UnityEngine.XR.OpenXR
 #elif UNITY_EDITOR_OSX
             // no loader for osx, use the mock by default
             loaderPath = $"../../MockRuntime/osx/{K_defaultOpenXRLoaderName}";
+#elif UNITY_EDITOR_LINUX
+            loaderPath = "../../../RuntimeLoaders/linux/x64/libopenxr_loader";
 #endif
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR && !UNITY_EDITOR_LINUX
             // Pass down active loader path to plugin
             EditorBuildSettings.TryGetConfigObject<Object>(Constants.k_SettingsKey, out var obj);
             if (obj != null && (obj is IPackageSettings packageSettings))
